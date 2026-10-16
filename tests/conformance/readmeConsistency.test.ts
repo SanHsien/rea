@@ -50,7 +50,6 @@ describe("onboarding documentation product facts", () => {
     const translatedReadmes = inventory
       .filter((language) => language.code !== "en")
       .map((language) => language.readme);
-    expect(translatedReadmes).toContain("docs/readme/README_zh.md");
     expect(translatedReadmes).toContain("docs/readme/README_zh-TW.md");
     const editions = (await readdir(resolve("docs/readme")))
       .filter((name) => /^README_[A-Za-z0-9-]+\.md$/u.test(name))

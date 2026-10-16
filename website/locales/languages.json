@@ -5,11 +5,5 @@
     "name": "繁體中文",
     "readme": "docs/readme/README_zh-TW.md",
     "dir": "ltr"
-  },
-  {
-    "code": "zh-CN",
-    "name": "简体中文",
-    "readme": "docs/readme/README_zh.md",
-    "dir": "ltr"
   }
 ]

@@ -1,6 +1,6 @@
 <div align="center">
 
-**English** · [简体中文](docs/readme/README_zh.md) · [繁體中文](README.md)
+**English** · [繁體中文](README.md)
 
 # REA: Reverse Engineer Anything
 

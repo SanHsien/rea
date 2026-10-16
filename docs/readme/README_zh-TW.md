@@ -1,6 +1,6 @@
 <div align="center">
 
-[English](../../README.en.md) · [简体中文](README_zh.md) · **繁體中文**
+[English](../../README.en.md) · **繁體中文**
 
 # REA：逆向一切
 

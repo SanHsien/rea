@@ -401,7 +401,7 @@ class WebsiteTranslationChecks(unittest.TestCase):
             root = Path(directory)
             for name in ("public", "templates", "locales"):
                 shutil.copytree(ROOT / "website" / name, root / "website" / name)
-            inventory = [item for item in languages(ROOT) if item["code"] in {"en", "zh-CN", "ar"}]
+            inventory = [item for item in languages(ROOT) if item["code"] in {"en", "zh-TW"}]
             (root / "website/locales/languages.json").write_text(json.dumps(inventory))
             for item in inventory:
                 destination = root / item["readme"]
@@ -413,7 +413,7 @@ class WebsiteTranslationChecks(unittest.TestCase):
 
     def test_source_change_preserves_review_and_excludes_stale_translation_from_search(self):
         with self.translated_project() as root:
-            path = root / "website/locales/zh-CN/messages.po"
+            path = root / "website/locales/zh-TW/messages.po"
             catalog = polib.pofile(path)
             old = catalog.find("How do I install REA?", msgctxt="page:faq/index.html")
             old.tcomment = "Reviewed installation wording."
@@ -433,27 +433,27 @@ class WebsiteTranslationChecks(unittest.TestCase):
             site = root / "website/_site"
             PREPARE.prepare_sitemap(site)
             fallback = VERIFY.HtmlReferences()
-            fallback.feed((site / "zh-CN/faq/index.html").read_text())
+            fallback.feed((site / "zh-TW/faq/index.html").read_text())
             self.assertTrue(fallback.translation_fallback)
             self.assertTrue(fallback.noindex())
             self.assertEqual(fallback.lang, "en")
-            self.assertNotIn("https://rea.tools/zh-CN/faq/", (site / "sitemap.xml").read_text())
-            self.assertNotIn('hreflang="zh-CN"', (site / "faq/index.html").read_text())
-            new.msgstr = "现在如何安装 REA？"
+            self.assertNotIn("https://rea.tools/zh-TW/faq/", (site / "sitemap.xml").read_text())
+            self.assertNotIn('hreflang="zh-TW"', (site / "faq/index.html").read_text())
+            new.msgstr = "現在如何安裝 REA？"
             new.flags.append("fuzzy")
             updated.save(path)
             build_translations(root, site)
-            self.assertIn('data-translation-fallback="true"', (site / "zh-CN/faq/index.html").read_text())
+            self.assertIn('data-translation-fallback="true"', (site / "zh-TW/faq/index.html").read_text())
             new.flags.remove("fuzzy")
             updated.save(path)
             build_translations(root, site)
             PREPARE.prepare_sitemap(site)
-            result = (site / "zh-CN/faq/index.html").read_text()
-            self.assertIn("现在如何安装 REA？", result)
+            result = (site / "zh-TW/faq/index.html").read_text()
+            self.assertIn("現在如何安裝 REA？", result)
             self.assertNotIn("data-translation-fallback", result)
-            self.assertIn('href="../assets/styles.css"', (site / "zh-CN/index.html").read_text())
-            self.assertIn('hreflang="zh-CN"', (site / "faq/index.html").read_text())
-            self.assertIn("https://rea.tools/zh-CN/faq/", (site / "sitemap.xml").read_text())
+            self.assertIn('href="../assets/styles.css"', (site / "zh-TW/index.html").read_text())
+            self.assertIn('hreflang="zh-TW"', (site / "faq/index.html").read_text())
+            self.assertIn("https://rea.tools/zh-TW/faq/", (site / "sitemap.xml").read_text())
 
     def test_broken_placeholders_and_inline_markup_fail_before_replacing_preview(self):
         with self.translated_project() as root:
@@ -463,29 +463,29 @@ class WebsiteTranslationChecks(unittest.TestCase):
                 '<p>Translation test <a href="get-started/">read more</a>.</p></main>',
             ))
             extract_catalogs(root)
-            path = root / "website/locales/zh-CN/messages.po"
+            path = root / "website/locales/zh-TW/messages.po"
             catalog = polib.pofile(path)
             entry = catalog.find("Translation test {ph0}read more{ph1}.", msgctxt="page:index.html")
             self.assertIsNotNone(entry)
-            entry.msgstr = "翻译测试：{ph0}继续阅读{ph1}。"
+            entry.msgstr = "翻譯測試：{ph0}繼續閱讀{ph1}。"
             catalog.save(path)
             site = root / "website/_site"
             build_translations(root, site)
-            before = (site / "zh-CN/index.html").read_bytes()
+            before = (site / "zh-TW/index.html").read_bytes()
             original = entry.msgstr
-            for bad, reason in (("丢失链接", "changed placeholders"), ("{ph1}错误的链接{ph0}", "invalid inline markup")):
+            for bad, reason in (("遺失連結", "changed placeholders"), ("{ph1}錯誤的連結{ph0}", "invalid inline markup")):
                 with self.subTest(reason=reason):
                     entry.msgstr = bad
                     catalog.save(path)
                     with self.assertRaisesRegex(ValueError, reason):
                         build_translations(root, site)
-                    self.assertEqual((site / "zh-CN/index.html").read_bytes(), before)
+                    self.assertEqual((site / "zh-TW/index.html").read_bytes(), before)
             entry.msgstr = original
             catalog.save(path)
             (root / "website/locales/languages.json").unlink()
             with self.assertRaisesRegex(ValueError, "Missing languages.json"):
                 build_translations(root, site)
-            self.assertEqual((site / "zh-CN/index.html").read_bytes(), before)
+            self.assertEqual((site / "zh-TW/index.html").read_bytes(), before)
 
     def test_runtime_message_drift_and_page_specific_completeness(self):
         with self.translated_project() as root:
@@ -499,14 +499,14 @@ class WebsiteTranslationChecks(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "one literal message"):
                 read_runtime(root)
             script.write_text(original)
-            path = root / "website/locales/zh-CN/messages.po"
+            path = root / "website/locales/zh-TW/messages.po"
             catalog = polib.pofile(path)
             catalog.find("Pause", msgctxt="runtime").msgstr = ""
             catalog.save(path)
             site = root / "website/_site"
             build_translations(root, site)
-            self.assertIn('data-translation-fallback="true"', (site / "zh-CN/examples/dino-lab/index.html").read_text())
-            self.assertNotIn('data-translation-fallback="true"', (site / "zh-CN/faq/index.html").read_text())
+            self.assertIn('data-translation-fallback="true"', (site / "zh-TW/examples/dino-lab/index.html").read_text())
+            self.assertNotIn('data-translation-fallback="true"', (site / "zh-TW/faq/index.html").read_text())
 
     def test_all_readme_editions_preserve_code_targets_downloads_and_reciprocal_routes(self):
         site = ROOT / "website/_site"

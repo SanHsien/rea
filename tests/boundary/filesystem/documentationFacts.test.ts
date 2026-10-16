@@ -14,7 +14,6 @@ const temporaryRoots: string[] = [];
 
 const README_FACT_FIXTURE_PATHS = [
   "README.md",
-  "docs/readme/README_zh.md",
   "docs/readme/README_zh-TW.md",
   "website/locales/languages.json",
   "docs/installation.md",
@@ -27,11 +26,10 @@ const README_LINK_DRIFT_MUTATIONS = [
     "(../installation.md#supported-agents)",
     "(../installation.md#missing-agents)",
   ],
-  ["https://rea.tools/zh-CN/guides/", "https://rea.tools/zh-CN/missing/"],
-  ["https://rea.tools/zh-CN/guides/", "https://rea.tools/zh-TW/guides/"],
+  ["https://rea.tools/zh-TW/guides/", "https://rea.tools/zh-TW/missing/"],
   [
-    "https://rea.tools/zh-CN/guides/",
-    "https://rea.tools/zh-CN/guides/?other=1",
+    "https://rea.tools/zh-TW/guides/",
+    "https://rea.tools/zh-TW/guides/?other=1",
   ],
   [
     'src="../assets/rea-hopper-analysis.png"',
@@ -64,7 +62,7 @@ describe("translated README facts", () => {
     const directory = await createTestTempDirectory("rea-readme-facts-");
     temporaryRoots.push(directory);
     await seedReadmeFactFixture(directory);
-    const translatedPath = join(directory, "docs/readme/README_zh.md");
+    const translatedPath = join(directory, "docs/readme/README_zh-TW.md");
     const translated = await readFile(translatedPath, "utf8");
     const catalog: ProductCatalog = JSON.parse(
       await readFile(join(root, "docs/public/product-catalog.json"), "utf8"),
@@ -82,7 +80,7 @@ describe("translated README facts", () => {
       await expect(
         documentationFactIssues(directory, catalog),
       ).resolves.toEqual([
-        "docs/readme/README_zh.md: documentation links differ from README.md",
+        "docs/readme/README_zh-TW.md: documentation links differ from README.md",
       ]);
     }
   });
