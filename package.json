@@ -6,11 +6,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/morluto/rea.git"
+    "url": "git+https://github.com/SanHsien/rea.git"
   },
-  "homepage": "https://github.com/morluto/rea#readme",
+  "homepage": "https://github.com/SanHsien/rea#readme",
   "bugs": {
-    "url": "https://github.com/morluto/rea/issues"
+    "url": "https://github.com/SanHsien/rea/issues"
   },
   "keywords": [
     "reverse-engineering",
@@ -75,6 +75,7 @@
     "scripts/prepare.mjs",
     "skills",
     "README.md",
+    "README.en.md",
     "DISCLAIMER.md",
     "THIRD_PARTY_NOTICES.md",
     "LICENSE",

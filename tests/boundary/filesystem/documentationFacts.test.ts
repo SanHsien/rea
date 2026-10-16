@@ -15,9 +15,7 @@ const temporaryRoots: string[] = [];
 const README_FACT_FIXTURE_PATHS = [
   "README.md",
   "docs/readme/README_zh.md",
-  "docs/readme/README_ja.md",
-  "docs/readme/README_ko.md",
-  "docs/readme/README_ar.md",
+  "docs/readme/README_zh-TW.md",
   "website/locales/languages.json",
   "docs/installation.md",
   "AGENTS.md",
@@ -39,7 +37,7 @@ const README_LINK_DRIFT_MUTATIONS = [
     'src="../assets/rea-hopper-analysis.png"',
     'src="../assets/missing-hopper.png"',
   ],
-  ['href="https://discord.gg/GkcryMnJDM"', 'href="https://discord.gg/missing"'],
+  ["(../installation.md#hopper)", "(../installation.md#missing-hopper)"],
 ] as const;
 
 const seedReadmeFactFixture = async (directory: string) => {

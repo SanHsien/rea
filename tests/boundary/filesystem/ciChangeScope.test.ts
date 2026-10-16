@@ -370,7 +370,7 @@ it("retains complete checks when implementation is renamed into documentation", 
 
 it("keeps main pushes scoped when a successful ancestor baseline is available", async () => {
   const { directory, base } = await fixture();
-  const head = await change(directory, ["docs/readme/README_ja.md"]);
+  const head = await change(directory, ["docs/readme/README_zh.md"]);
   expect(await classify(directory, base, head, "push")).toMatchObject({
     tier: "fast",
     code: false,
@@ -621,7 +621,7 @@ it.each([
   ],
   ["scripts/website_i18n.py", { code: false, website: true, package: false }],
   [
-    "docs/readme/README_ja.md",
+    "docs/readme/README_zh.md",
     { code: false, docs: true, website: true, package: false },
   ],
   [
@@ -1124,7 +1124,7 @@ it.each(["workflow_dispatch", "schedule"])(
 it("honors ci:full for successive PR revisions", async () => {
   const { directory, base } = await fixture();
   const first = await change(directory, ["README.md"]);
-  const second = await change(directory, ["docs/readme/README_ja.md"]);
+  const second = await change(directory, ["docs/readme/README_zh.md"]);
   for (const head of [first, second]) {
     expect(
       await classify(directory, base, head, "pull_request", true),

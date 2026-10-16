@@ -26,9 +26,11 @@ FALLBACK_NOTICE = "Translation is being updated. Read this page in English for n
 
 
 def readme_edition_paths(root):
-    """Return repo-relative README editions: root English plus docs/readme translations."""
+    """Return repo-relative README editions: English plus docs/readme translations."""
     editions = set()
-    if (root / "README.md").is_file():
+    if (root / "README.en.md").is_file():
+        editions.add("README.en.md")
+    elif (root / "README.md").is_file():
         editions.add("README.md")
     folder = root / "docs" / "readme"
     if folder.is_dir():

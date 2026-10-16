@@ -1,56 +1,31 @@
 <div align="center">
 
-**English** · [简体中文](docs/readme/README_zh.md) · [繁體中文](docs/readme/README_zh-TW.md) · [日本語](docs/readme/README_ja.md) · [한국어](docs/readme/README_ko.md) · [Türkçe](docs/readme/README_tr.md) · [Русский](docs/readme/README_ru.md) · [Tiếng Việt](docs/readme/README_vi.md) · [ไทย](docs/readme/README_th.md) · [Deutsch](docs/readme/README_de.md) · [Español](docs/readme/README_es.md) · [Français](docs/readme/README_fr.md) · [Українська](docs/readme/README_uk.md) · [Polski](docs/readme/README_pl.md) · [Português (Brasil)](docs/readme/README_pt-BR.md) · [العربية](docs/readme/README_ar.md) · [فارسی](docs/readme/README_fa.md) · [Bahasa Indonesia](docs/readme/README_id.md) · [Italiano](docs/readme/README_it.md)
-· [Ελληνικά](docs/readme/README_el.md)
+[English](README.en.md) · [简体中文](docs/readme/README_zh.md) · **繁體中文**
 
-# REA: Reverse Engineer Anything
+# REA：逆向一切
 
-### One MCP for reverse engineering across binaries, applications, and runtime behavior.
+### 通過一個 MCP 服務，逆向分析二進位檔案、應用程式和執行階段行為。
 
-**See a feature you like. Understand how it works, down to the binary level.**
+**看到喜歡的功能，弄清它的工作原理，深入到二進位層面。**
 
 [![npm version](https://img.shields.io/npm/v/rea-agents?style=flat-square&color=cb3837)](https://www.npmjs.com/package/rea-agents)
 [![MCP tool catalog](https://img.shields.io/badge/MCP-tool_catalog-5c4ee5?style=flat-square)](docs/mcp-contracts.md#generated-catalog)
-[![Node.js requirements](https://img.shields.io/badge/Node.js-requirements-339933?style=flat-square&logo=nodedotjs&logoColor=white)](#what-you-can-analyze)
-[![skills.sh](https://skills.sh/b/morluto/rea?style=flat-square)](https://skills.sh/morluto/rea/reverse-engineer-anything)
+[![Node.js requirements](https://img.shields.io/badge/Node.js-requirements-339933?style=flat-square&logo=nodedotjs&logoColor=white)](#current-status)
 [![MIT license](https://img.shields.io/badge/license-MIT-f4c430?style=flat-square)](LICENSE)
-[![Discord](https://img.shields.io/discord/1556595354999332884?logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/GkcryMnJDM)
 
-<a href="https://trendshift.io/repositories/82054?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-82054" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/82054" alt="morluto%2Frea | Trendshift" width="250" height="55"/></a>
-
-**[Website](https://rea.tools/) · [Guides](https://rea.tools/guides/) · [Showcases](https://rea.tools/showcase/)**
-
-[Quick start](#quick-start) · [How REA works](#how-rea-works) · [What you can analyze](#what-you-can-analyze) · [Showcases](#showcases) · [FAQ](#faq) · [Documentation](#documentation)
+[快速開始](#快速開始) · [REA 的工作原理](#rea-的工作原理) · [可以分析什麼](#可以分析什麼) · [案例](#案例) · [常見問題](#常見問題) · [GNU objdump 與 Rizin 工具](docs/reverse-engineering-tools.md) · [文件](#文件)
 
 <code>npx rea-agents setup</code>
 
 </div>
 
-> [!IMPORTANT]
-> Get REA from [morluto/rea](https://github.com/morluto/rea),
-> [rea.tools](https://rea.tools/), or the [rea-agents npm package](https://www.npmjs.com/package/rea-agents).
-> Follow the installation and release links from these official sources. A similar
-> repository name or copied README does not establish that a download is official.
+> **Fork 說明**：本專案為 [morluto/rea](https://github.com/morluto/rea) 的 Fork 分支。
 
 <div align="center">
 
 <br />
 
-<img src="docs/assets/rea-hopper-analysis.png" alt="REA launching its analysis bridge inside Hopper while inspecting a native binary" width="1200" />
-
-<br /><br />
-
-<table aria-label="REA community">
-<tr>
-<td align="center" width="360">
-  <a href="https://discord.gg/GkcryMnJDM">
-    <img src="docs/assets/discord.svg" height="42" alt="Discord" /><br />
-    <strong>Join the Reverse Engineering Community</strong>
-  </a><br />
-  <sub>Discord · Q&amp;A · Show and Tell</sub>
-</td>
-</tr>
-</table>
+<img src="docs/assets/rea-hopper-analysis.png" alt="REA 在 Hopper 中啟動分析橋，檢查原生二進位檔案" width="1200" />
 
 <br />
 
@@ -58,338 +33,247 @@
 
 ---
 
-See a feature in an app that you want in your own product? Ask your agent to investigate it with REA. It can inspect the app without its source code, explain how the feature works, show the evidence, and build a version for your project.
+在應用中看到一個想加入自己產品的功能？讓 AI 代理用 REA 調查它。即使沒有原始碼，AI 代理也可以檢查應用、解釋功能的工作方式、展示證據，並為你的專案實現類似功能。
 
-REA connects your agent to tools for inspecting native binaries, JavaScript and Electron apps, .NET assemblies, and websites. You can also use the same tools from your terminal. Analysis runs locally, and results include the evidence and limitations behind each conclusion.
+REA 將 AI 代理連接到分析工具，用於檢查原生二進位檔案、JavaScript 和 Electron 應用、.NET 程式集以及網站。你也可以在終端中使用同樣的工具。分析在本機執行，結果包含支撐各項結論的證據和相關限制。
 
-Setup registers REA with your agent and installs matching workflow instructions. Native analysis can use an existing Hopper, Ghidra, or IDA installation; setup can optionally install Hopper with approval. Static JavaScript analysis needs no native analysis engine.
+設定流程會向 AI 代理註冊 REA，並安裝對應的工作流程指引。原生分析可以使用已有的 Hopper、Ghidra 或 IDA；設定流程也可以在你核准後安裝 Hopper。靜態 JavaScript 分析不需要原生分析引擎。
 
-> **[Visit the REA website](https://rea.tools/)** for setup instructions, illustrated guides, and real case studies.
+## 快速開始
 
-## Quick start
+### 設定 AI 代理
 
-On Linux, Ghidra, JADX, firmware tool launches and static JavaScript/Electron
-analysis require a procps-compatible `ps` on REA's `PATH` for process ownership
-checks. Recovery steps are in `docs/installation.md` under
-"Linux owned-process prerequisite".
-
-### Set up your agent
-
-With Node.js and npm installed, run:
+安裝 Node.js 和 npm 後，執行：
 
 ```bash
 npx rea-agents setup
 ```
 
-Choose your agents, review the proposed changes, and approve them. Setup adds
-REA's MCP server and matching workflow instructions, with backups of existing
-configuration. Restart your agent afterward.
+選擇 AI 代理，檢查計劃中的變更並核准。設定流程會添加 REA 的 MCP 服務和對應的工作流程指引，並備份已有組態。完成後重新啟動 AI 代理。
 
-Setup supports Claude Code, Codex, Cursor, Gemini CLI, Grok Build and
-[other agents](docs/installation.md#supported-agents). See
-[installation and setup](docs/installation.md) for provider configuration and
-manual MCP registration.
+設定流程支援 Claude Code、Codex、Cursor、Gemini CLI、Grok Build 和[其他 AI 代理](docs/installation.md#supported-agents)。提供者組態和手動註冊 MCP 的方法見[安裝與設定](docs/installation.md)。
 
-### Ask your agent
+### 詢問 AI 代理
 
 ```text
-Understand how search works in the Notes app, show me the evidence, and build a
-similar feature for my project.
+弄清 Notes 應用的搜尋功能如何工作，展示證據，並為我的專案實現類似功能。
 ```
 
-Replace Notes with your target app and the feature you want to understand.
+把 Notes 替換為目標應用，並描述你想瞭解的功能。
 
-### Use the terminal
+### 使用終端
 
-Inspect an extracted JavaScript/Electron app directory or ASAR:
+檢查已解包的 JavaScript/Electron 應用目錄或 ASAR 檔案：
 
 ```bash
 npx -y rea-agents@latest analyze-javascript-application /absolute/path/to/app --json
 ```
 
-The result includes modules, imports, Electron boundaries and their evidence.
-Replace the path with your target, such as `"D:/apps/example"` on Windows.
+結果包含模組、匯入、Electron 邊界及相關證據。將路徑替換為你的目標路徑，例如 Windows 上的 `"D:/apps/example"`。
 
-To install the `rea` command for regular use:
+如果需要經常使用，可以安裝 `rea` 命令：
 
 ```bash
 npm install --global rea-agents
 rea --help
 ```
 
-For native analysis, configure a provider first. See the
-[CLI and Evidence guide](docs/cli.md) for native commands, provider selection,
-snapshots and scripting.
+原生分析需要先設定分析提供者。原生命令、提供者選擇、快照和腳本用法見 [CLI 與 Evidence 指南](docs/cli.md)。
 
-### Update REA
+### 更新 REA
 
-REA changes quickly, and new releases include frequent bug fixes. Keep your
-installation up to date.
+REA 更新較快，新版本經常包含錯誤修復。請將安裝的版本保持最新。
 
-For a CLI installed with `npm install --global` or `bun add --global`:
+通過 `npm install --global` 或 `bun add --global` 安裝的 CLI 使用：
 
 ```bash
 rea update
 ```
 
-Bun global updates require Bun 1.2.17 or later. With an older Bun release,
-upgrade Bun manually before running `rea update`.
+Bun 全域更新需要 Bun 1.2.17 或更新版本。如果使用較舊的 Bun 版本，請先手動升級 Bun，再執行 `rea update`。
 
-To refresh your agent registrations and skill, run the setup command printed
-by the update.
+要更新 AI 代理註冊和 skill，請執行更新命令輸出的設定命令。
 
-If you use `npx`, update your agent setup with:
+如果使用 `npx`，通過以下命令更新 AI 代理設定：
 
 ```bash
 npx rea-agents@latest setup
 ```
 
-Review the setup changes and restart your agent. For one-off CLI commands,
-use `npx rea-agents@latest` followed by the command. With Bun, use
-`bunx rea-agents@latest` in place of `npx rea-agents@latest`.
+檢查設定變更並重新啟動 AI 代理。單次 CLI 操作可使用 `npx rea-agents@latest`，後接所需命令。使用 Bun 時，用 `bunx rea-agents@latest` 代替 `npx rea-agents@latest`。
 
-## How REA works
+## REA 的工作原理
 
-Your agent calls REA through MCP to inspect the target and trace relevant code.
-REA returns findings with their evidence. The agent uses them to ask follow-up
-questions, explain the behavior, or write and test an implementation.
-CLI commands use the same workflows.
+AI 代理通過 MCP 呼叫 REA，檢查目標並追蹤相關程式碼。REA 返回發現及對應證據。AI 代理據此提出後續問題、解釋行為，或編寫並測試實現。CLI 命令使用同樣的工作流程。
 
-![REA investigation flow: your agent asks about a local target, REA inspects and traces it using analysis tools, and the agent uses the returned code, references and unknowns to explain, implement and test.](website/public/assets/figures/rea-investigation-flow.svg)
+![REA 調查流程：AI 代理詢問本地目標的行為，REA 使用分析工具檢查和追蹤目標，AI 代理再利用返回的程式碼、引用和未知項進行解釋、實現與測試。](website/public/assets/figures/rea-investigation-flow.svg)
 
-[Open the full-size figure](website/public/assets/figures/rea-investigation-flow.svg).
+[打開完整尺寸的圖示](website/public/assets/figures/rea-investigation-flow.svg)。
 
 <a id="current-status"></a>
 
-## What you can analyze
+## 可以分析什麼
 
-REA requires Node.js 22.x (>=22.19), 24.x (>=24.11), or 26+, plus npm.
-Additional tools and host support depend on the target:
+REA 需要 Node.js 22.x（>=22.19）、24.x（>=24.11）或 26+，以及 npm。額外工具和主機支援取決於分析目標：
 
-| Target                 | What REA returns                                                                     | Requirements and guide                                                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Native binaries        | Pseudocode, assembly, strings, symbols, calls and references                         | Hopper, Ghidra or IDA; [native analysis](docs/native-investigation.md)                                                                |
-| Offline ELF layout     | Sections, segments, original symbols/relocations and static mitigation candidates    | Caller-supplied pwntools on Linux x64; [binary diagnostics](docs/binary-diagnostics.md)                                               |
-| Go binaries            | Embedded compiler version, modules, replacements and build settings                  | Built-in static ELF/PE/thin Mach-O inspection; no Go installation required                                                            |
-| Rust binaries          | Embedded cargo-auditable crate names, versions, sources and dependency edges         | Built-in static ELF/PE/thin Mach-O inspection; [Rust binaries](docs/rust-binaries.md)                                                 |
-| WASM artifact          | Validation, sections, exact import/export WAT forms and decoded WAT                  | Caller-supplied WABT 1.0.42; `inspect_wasm_artifact`                                                                                  |
-| EVM bytecode           | Dispatch selectors, byte offsets, inferred arguments and mutability                  | Local raw/hex carrier on Linux x64; [offline EVM guide](docs/evm-bytecode.md)                                                         |
-| SQLite databases       | Tables, columns, indexes, views, triggers and selected ordinary-table rows           | Local database/WAL snapshot; Node.js 24.x >=24.15 or 26+ with native SQLite limits                                                    |
-| Recorded Linux crashes | Raw notes, every recorded thread's registers/signals and optional mapping candidates | Caller-supplied pwntools on Linux x64; optional GDB/pwndbg; [recorded crashes](docs/recorded-crashes.md)                              |
-| JavaScript / Electron  | Modules, imports, source maps, routes, IPC and native add-on relationships           | Node.js and npm; Linux: procps-compatible `ps`; [application analysis](docs/javascript-application-workflows.md)                      |
-| Websites               | Page structure, scripts, network observations and requested screenshots              | A Chrome-family browser; [browser analysis](docs/browser-observation.md)                                                              |
-| Saved network captures | Requests, responses, exposed payloads and source locations                           | HAR or Fiddler Everywhere SAZ; mitmdump on Linux for native mitmproxy; [capture guide](docs/web-network-captures.md)                  |
-| .NET assemblies        | Metadata, CIL instructions, declared native dependencies and build comparisons       | None (static only); [managed-code guide](docs/managed-code-analysis.md)                                                               |
-| Android APKs           | Manifest declarations, classes, decompiled methods and references                    | Headless JADX and a full JDK on Linux/macOS/Windows x64; [Android guide](docs/android-analysis.md)                                    |
-| Android devices        | Devices, packages, processes, logs, dumps, screen captures, and APK/file transfers   | Caller-supplied adb (emulator or hardware); [ADB guide](docs/adb-device-analysis.md)                                                  |
-| JEB projects           | Engine-backed project units, artifact digests and type/method pseudo-code            | A caller-started JEB client serving MCP, selected with REA_JEB_MCP_URL; [JEB guide](docs/jeb-analysis.md)                             |
-| Android resources      | Decoded manifest, string tables, locales and version facts                           | Caller-supplied Apktool launcher; [resource guide](docs/apktool-resource-analysis.md)                                                 |
-| Flutter apps           | Dart snapshot hash, per-ABI library digests and engine build provenance              | None (static APK parsing); [Flutter guide](docs/flutter-analysis.md)                                                                  |
-| Firmware               | Regions, extraction results and native-analysis handoffs                             | Binwalk / Unblob on Linux; [firmware guide](docs/firmware-analysis.md)                                                                |
-| Recorded packets       | Selected fields, repeated values, filters and decode-as rules                        | Linux: TShark 4.x + prlimit; [capture guide](docs/packet-captures.md)                                                                 |
-| Packet summaries       | Endpoints, DNS, TLS SNI, protocol distribution and HTTP requests                     | Caller-supplied tshark and capinfos (Linux-verified); [pcap guide](docs/pcap-analysis.md)                                             |
-| Recorded logic signals | Decoder annotations, sample ranges and diagnostics                                   | Linux: sigrok-cli 0.7.2 + prlimit; [signal recordings](docs/signal-recordings.md)                                                     |
-| Packages and resources | File inventories, digests, plists, Apple bundle anatomy and extracted resources      | [Artifact and JavaScript guide](docs/javascript-artifact-reconstruction.md), [Apple applications](docs/apple-application-analysis.md) |
-| Process behavior       | Terminal output, interactions, exit and filesystem observations, and run comparisons | Linux/macOS with a native PTY; [process capture](docs/process-capture.md)                                                             |
+| 目標                  | REA 返回的內容                                                  | 要求與指南                                                                                                         |
+| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 原生二進位檔案        | 偽程式碼、組合語言、字串、符號、呼叫和引用                      | Hopper、Ghidra 或 IDA；[原生分析](docs/native-investigation.md)                                                      |
+| 離線 ELF 佈局         | 節、段、原始符號/重定位資訊及靜態防護機制候選項                 | Linux x64 上由呼叫方提供的 pwntools；[二進位診斷](docs/binary-diagnostics.md)                                        |
+| Go 二進位檔案         | 內嵌編譯器版本、模組、替換項和建置設定                          | 內建靜態 ELF/PE/thin Mach-O 檢查；無需安裝 Go                                                                      |
+| WASM 工件             | 驗證、節、精確的匯入/匯出 WAT 形式及解碼後的 WAT                | 呼叫方提供的 WABT 1.0.42；`inspect_wasm_artifact`                                                                  |
+| EVM 位元組碼          | 分派選擇器、位元組偏移、推斷的參數和狀態可變性                  | Linux x64 上的本地原始位元組/十六進位輸入載體；[離線 EVM 指南](docs/evm-bytecode.md)                                 |
+| Rust binaries         | Embedded cargo-auditable dependency list                        | [Rust binaries](docs/rust-binaries.md)                                                                               |
+| 已記錄的 Linux 崩潰   | 原始 note 記錄、每個已記錄執行緒的暫存器/訊號及可選的對映候選項 | Linux x64 上由呼叫方提供的 pwntools；可選的 GDB/pwndbg；[已記錄崩潰](docs/recorded-crashes.md)                       |
+| JavaScript / Electron | 模組、匯入、source map、路由、IPC 和原生附加元件關係            | Node.js 和 npm；[應用分析](docs/javascript-application-workflows.md)                                                 |
+| 網站                  | 頁面結構、腳本、網路觀察結果和按請求獲取的螢幕擷取畫面          | Chrome 系瀏覽器；[瀏覽器分析](docs/browser-observation.md)                                                           |
+| 已保存的網路擷取      | 請求、回應、可訪問的酬載和來源位置                              | HAR；原生 mitmproxy 擷取需要 Linux 上的 mitmdump；[擷取指南](docs/web-network-captures.md)                           |
+| 封包擷取              | 端點、DNS、TLS SNI、通訊協定分佈和 HTTP 請求                    | 呼叫端提供的 tshark 和 capinfos；[pcap 指南](docs/pcap-analysis.md)                                                  |
+| .NET 程式集           | 中繼資料、CIL 指令、聲明的原生依賴和建置對比                    | 靜態檢查；[托管程式碼指南](docs/managed-code-analysis.md)                                                            |
+| Android APK           | 清單聲明、類別、反編譯的方法和引用                              | Linux/macOS/Windows x64 上的無界面 JADX 和完整 JDK；[Android 指南](docs/android-analysis.md)                         |
+| Android 裝置          | 裝置、套件、程序、日誌、傾印、螢幕擷取以及 APK/檔案傳輸         | 呼叫端提供的 adb（模擬器或實體裝置）；[ADB 指南](docs/adb-device-analysis.md)                                        |
+| JEB 專案              | 引擎支援的專案單元、成品摘要和型別/方法的虛擬碼                 | 由呼叫端啟動、提供 MCP 的 JEB 用戶端，透過 REA_JEB_MCP_URL 選擇；[JEB 指南](docs/jeb-analysis.md)                    |
+| Android 資源          | 解碼後的清單、字串表、語系和版本資訊                            | 呼叫端提供的 Apktool 啟動器；[資源指南](docs/apktool-resource-analysis.md)                                           |
+| Flutter 應用          | Dart 快照雜湊、依 ABI 的程式庫雜湊及引擎建置來源                | 無（靜態 APK 解析）；[Flutter 指南](docs/flutter-analysis.md)                                                        |
+| 韌體                  | 區域、提取結果和轉交原生分析的內容                              | Linux 上的 Binwalk / Unblob；[韌體指南](docs/firmware-analysis.md)                                                   |
+| 封包記錄              | 指定欄位、重複值、篩選條件與解碼規則                            | Linux: TShark 4.x + prlimit; [封包分析指南](docs/packet-captures.md)                                                 |
+| 錄製的邏輯訊號        | 解碼註解、樣本範圍與診斷資訊                                    | Linux: sigrok-cli 0.7.2 + prlimit; [訊號記錄指南](docs/signal-recordings.md)                                         |
+| 軟體包與資源          | 檔案清單、摘要、plist、Apple bundle 結構和提取的資源            | [製品與 JavaScript 指南](docs/javascript-artifact-reconstruction.md)、[Apple 應用](docs/apple-application-analysis.md) |
+| 處理程序行為          | 終端輸出、互動、退出和檔案系統觀察結果，以及執行對比            | 支援原生 PTY 的 Linux/macOS；[處理程序擷取](docs/process-capture.md)                                                 |
 
-Static JavaScript and .NET inspection read the supplied files without running
-the application. Runtime capture runs or interacts with the selected target
-using your user permissions; each runtime guide describes its effects.
-
-For offline native-binary inspection, REA also supports caller-supplied GNU
-objdump and Rizin. See the [reverse-engineering tools guide](docs/reverse-engineering-tools.md)
-for provider setup, CLI commands, and Evidence limitations. REA does not install
-or update either provider.
+靜態 JavaScript 和 .NET 檢查讀取提供的檔案，不執行應用。執行階段擷取會以你的使用者權限執行目標或與之互動；各執行階段指南說明瞭具體影響。
 
 <a id="choosing-a-deep-analysis-provider"></a>
 
-Native formats and host support vary by provider. See
-[Hopper and Ghidra setup](docs/installation.md#hopper), the
-[IDA guide](docs/ida-provider.md) (including an optional native MCP bridge), the
-[Kuna decompiler guide](docs/kuna-provider.md), and
-[experimental Windows Ghidra support](docs/windows-ghidra-p0.md).
-Ghidra also supports [16-bit DOS analysis](docs/ghidra-dos.md).
-For large binaries, raise the provider's startup deadline with
-`REA_GHIDRA_STARTUP_TIMEOUT_MS` or `REA_HOPPER_STARTUP_TIMEOUT_MS`.
-For provider selection, see the [CLI guide](docs/cli.md#choose-a-provider).
-Check [release availability](docs/installation.md#released-package-and-main)
-for features added since the latest npm release.
+不同提供者支援的原生格式和主機系統有所不同。請參閱 [Hopper 與 Ghidra 設定](docs/installation.md#hopper)、[IDA 指南](docs/ida-provider.md)、[Kuna](docs/kuna-provider.md)和[實驗性 Windows Ghidra 支援](docs/windows-ghidra-p0.md)。Ghidra 也支援 [16 位 DOS 分析](docs/ghidra-dos.md)。提供者選擇見 [CLI 指南](docs/cli.md#choose-a-provider)。對於最新 npm 版本發佈後新增的功能，請查看[發佈可用性](docs/installation.md#released-package-and-main)。
 
-## Showcases
+## 案例
 
-[![Illustrations of the DX-Ball sound-pan, Notion clipboard-bridge, and TH04 bullet-ring showcases](docs/assets/rea-showcases.png)](https://rea.tools/showcase/)
+[![DX-Ball 聲音平移、Notion 剪貼簿橋接與 TH04 彈幕環案例的插圖](docs/assets/rea-showcases.png)](https://rea.tools/zh-TW/showcase/)
 
-### DX-Ball: reconstruct a sound-pan calculation
+### DX-Ball：重建聲像計算
 
-Follow a sound call into its position-to-pan helper, inspect the instructions,
-and turn incomplete pseudocode into C. The reconstruction passes 3,205
-original-x86 cases and reproduces all 63 compiled function bytes.
+沿聲音呼叫追蹤到根據位置計算聲像的輔助函數，檢查指令，將不完整的偽程式碼轉為 C。重建結果通過了 3,205 個原始 x86 測試用例，並復現了編譯後函數的全部 63 個位元組。
 
-[Read the case study](https://rea.tools/showcase/dx-ball/) ·
-[Reconstruction repository](https://github.com/N0zoM1z0/dx-ball)
+[閱讀案例](https://rea.tools/zh-TW/showcase/dx-ball/) ·
+[重建專案儲存庫](https://github.com/N0zoM1z0/dx-ball)
 
-### Notion: trace the Electron clipboard bridge
+### Notion：追蹤 Electron 剪貼簿橋
 
-Find the renderer's clipboard API, follow it through preload and IPC into the
-main process, and inspect the rich clipboard format.
+找到渲染處理程序的剪貼簿 API，沿 preload 和 IPC 追蹤到主處理程序，並檢查富格式剪貼簿資料。
 
-[Read the case study](https://rea.tools/showcase/notion/)
+[閱讀案例](https://rea.tools/zh-TW/showcase/notion/)
 
-### TH04: recover a DOS bullet-ring calculation
+### TH04：恢復 DOS 環形子彈的計算
 
-Inspect the original PC-98 game's 16-bit instructions, recover the fixed and
-aimed angle calculations, and compare the reconstructed C++ with the
-historical compiler output.
+檢查原始 PC-98 遊戲的 16 位指令，恢復固定角度和瞄準角度的計算，並將重建的 C++ 與當年的編譯器輸出進行對比。
 
-[Read the case study](https://rea.tools/showcase/th04/) ·
-[Reconstruction repository](https://github.com/N0zoM1z0/th04)
+[閱讀案例](https://rea.tools/zh-TW/showcase/th04/) ·
+[重建專案儲存庫](https://github.com/N0zoM1z0/th04)
 
-If you've used REA on something interesting, we'd love to see it. Share your
-case in an [issue](https://github.com/morluto/rea/issues) or a
-[pull request](https://github.com/morluto/rea/pulls), including the target,
-your question, how REA helped, and what you found.
+如果你用 REA 分析了有趣的目標，我們很想瞭解。歡迎通過 [issue](https://github.com/morluto/rea/issues) 或 [pull request](https://github.com/morluto/rea/pulls) 分享案例，說明目標、你的問題、REA 如何提供幫助，以及你的發現。
 
-## FAQ
+## 常見問題
 
 <details>
-<summary><strong>Which agents can use REA?</strong></summary>
+<summary><strong>哪些 AI 代理可以使用 REA？</strong></summary>
 
-Any agent that supports local MCP servers. Setup configures the
-[supported agents](docs/installation.md#supported-agents); other clients can use
-[manual MCP registration](docs/installation.md#mcp-registry).
+任何支援本地 MCP 服務的 AI 代理都可以使用。設定流程會設定[受支援的 AI 代理](docs/installation.md#supported-agents)；其他客戶端可通過[手動註冊 MCP](docs/installation.md#mcp-registry) 使用。
 
 </details>
 
 <details>
-<summary><strong>Do I need Hopper, Ghidra or IDA?</strong></summary>
+<summary><strong>需要 Hopper、Ghidra 或 IDA 嗎？</strong></summary>
 
-Deep native analysis uses one of them. Static JavaScript and .NET inspection
-work without a native analysis engine. Setup can install Hopper after approval;
-Ghidra and IDA use your existing installations. See [provider setup](docs/installation.md#hopper).
+深入的原生分析需要其中一個引擎。靜態 JavaScript 和 .NET 檢查不需要原生分析引擎。設定流程可以在你核准後安裝 Hopper；Ghidra 和 IDA 則使用已有安裝。見[提供者設定](docs/installation.md#hopper)。
 
 </details>
 
 <details>
-<summary><strong>Do I need to start Hopper first?</strong></summary>
+<summary><strong>需要先啟動 Hopper 嗎？</strong></summary>
 
-REA starts Hopper when an operation needs it. On macOS, a first-run dialog may
-ask you to choose demo mode or activate your license. Complete that prompt in the
-same user session before your first CLI/MCP operation or unattended job. Open
-Hopper manually if needed. See
-[Hopper startup and troubleshooting](docs/installation.md#launcher-paths-and-troubleshooting).
+REA 會在操作需要時啟動 Hopper。在 macOS 上，首次執行時可能會出現對話框，讓你選擇演示模式或啟用授權。見 [Hopper 啟動與故障排查](docs/installation.md#launcher-paths-and-troubleshooting)。
 
 </details>
 
 <details>
-<summary><strong>What does installing the skill from skills.sh do?</strong></summary>
+<summary><strong>從 skills.sh 安裝 skill 有什麼作用？</strong></summary>
 
-The skill supplies investigation instructions for your agent. Use `npx rea-agents setup`
-to register REA's MCP server and install the matching instructions, then restart
-your agent. See [skill-only installation](docs/installation.md#skill-only-installation).
+skill 為 AI 代理提供調查指引。使用 `npx rea-agents setup` 註冊 REA 的 MCP 服務並安裝對應的指引，然後重新啟動 AI 代理。見[僅安裝 skill](docs/installation.md#skill-only-installation)。
 
 </details>
 
 <details>
-<summary><strong>What code does REA return?</strong></summary>
+<summary><strong>REA 返回什麼程式碼？</strong></summary>
 
-Native analysis returns pseudocode and assembly. JavaScript/Electron analysis
-recovers modules and their relationships. Your agent uses these findings to
-write and test an implementation; the [showcases](#showcases) give worked examples.
+原生分析返回偽程式碼和組合語言。JavaScript/Electron 分析恢復模組及其關係。AI 代理利用這些發現編寫並測試實現；[案例](#案例)提供了完整示例。
 
 </details>
 
 <details>
-<summary><strong>Does REA upload my app?</strong></summary>
+<summary><strong>REA 會上傳我的應用嗎？</strong></summary>
 
-REA analyzes targets locally. Your agent receives the tool results, and its
-model provider has its own data policy.
+REA 在本機分析目標。AI 代理會接收工具結果，其模型提供商有自己的資料政策。
 
 </details>
 
 <details>
-<summary><strong>What should I do if I hit a bug?</strong></summary>
+<summary><strong>遇到錯誤時該怎麼辦？</strong></summary>
 
-Update first; a recent release may already fix it.
+先更新；最近的版本可能已經修復了問題。
 
-For a CLI installed with `npm install --global` or `bun add --global`:
+通過 npm 安裝的 CLI 使用：
 
 ```bash
 rea update
 ```
 
-For agent setup through `npx`:
+通過 `npx` 設定 AI 代理時使用：
 
 ```bash
 npx rea-agents@latest setup
 ```
 
-If you're using an agent, complete the [setup refresh](#update-rea) and restart
-it. Retry the same task. If the problem persists, [open an issue](https://github.com/morluto/rea/issues)
-with your REA version, target type, steps to reproduce and error output.
+如果正在使用 AI 代理，請完成[設定更新](#更新-rea)並重新啟動 AI 代理。重試同一任務。如果問題仍然存在，請[提交 issue](https://github.com/morluto/rea/issues)，附上 REA 版本、目標類型、復現步驟和錯誤輸出。
 
 </details>
 
-## Documentation
+## 文件
 
-Start with the website's [worked guides](https://rea.tools/guides/).
-For exact options, prerequisites and result contracts:
+可以先閱讀網站上的[實操指南](https://rea.tools/zh-TW/guides/)。具體選項、前提條件和結果契約見：
 
-- [Installation and setup](docs/installation.md): agent registration, provider configuration, updates and uninstall.
-- [Readiness and troubleshooting](docs/installation.md#check-readiness-for-your-task): diagnose one agent or analysis engine.
-- [CLI and Evidence](docs/cli.md): commands, provider selection, snapshots, import/export and exit statuses.
-- [MCP contracts](docs/mcp-contracts.md) and [agent prompts](docs/mcp-prompts.md): tool results, sessions and guided investigations.
-- [Tool catalog](docs/mcp-contracts.md#generated-catalog): generated inventory of tools, providers and CLI commands.
-- [Roadmap](docs/roadmap.md): planned work and capability trackers.
+- [安裝與設定](docs/installation.md)：AI 代理註冊、提供者組態、更新和卸載。
+- [就緒檢查與故障排查](docs/installation.md#check-readiness-for-your-task)：診斷特定 AI 代理或分析引擎。
+- [CLI 與 Evidence](docs/cli.md)：命令、提供者選擇、快照、匯入/匯出和退出狀態。
+- [MCP 契約](docs/mcp-contracts.md)和[AI 代理提示詞](docs/mcp-prompts.md)：工具結果、會話和引導式調查。
+- [工具目錄](docs/mcp-contracts.md#generated-catalog)：建置時生成的工具、提供者和 CLI 命令清單。
+- [路線圖](docs/roadmap.md)：計劃中的工作和能力跟蹤。
 
-Report vulnerabilities through [SECURITY.md](SECURITY.md).
+請按照 [SECURITY.md](SECURITY.md) 報告漏洞。
 
-## Star history
+## 免責聲明
 
-🎉 **250,000 GitHub stars — thank you!**
+負責任使用的相關指引請見 [DISCLAIMER.md](DISCLAIMER.md)。
 
-Thanks to everyone using REA, reporting bugs, requesting features, testing builds, and contributing fixes.
+REA 用於合法的研究、教育、互通性、軟體保存，以及分析你擁有或獲准檢查的軟體。
 
-<a href="https://www.star-history.com/?repos=morluto%2Frea&amp;type=date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=morluto/rea&amp;type=date&amp;theme=dark&amp;legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=morluto/rea&amp;type=date" />
-    <img alt="REA GitHub star history" src="https://api.star-history.com/chart?repos=morluto/rea&amp;type=date" />
-  </picture>
-</a>
+本專案對非法或未經授權使用的立場涵蓋所有 REA 版本、分發管道和執行平台；
+每份副本仍適用其隨附的授權。
 
-## Disclaimer
+## 參與貢獻
 
-See [DISCLAIMER.md](DISCLAIMER.md) for responsible-use guidance.
+歡迎幫助改進 REA！你可以[提交 issue](https://github.com/morluto/rea/issues) 報告錯誤或建議功能，也可以[提交 pull request](https://github.com/morluto/rea/pulls) 改進程式碼或文件。
 
-The project's position on illegal or unauthorized use covers all REA versions,
-distribution channels, and platforms; each copy retains its applicable licenses.
+開發設定和檢查見 [CONTRIBUTING.md](CONTRIBUTING.md)，驗證流程見[測試指南](docs/testing.md)，專案結構見[架構圖](docs/architecture.mermaid)。
 
-REA is for lawful research, education, interoperability, software preservation,
-and analysis of software you own or are authorized to examine.
-
-## Contributing
-
-We'd love your help with REA! [Open an issue](https://github.com/morluto/rea/issues) to
-report a bug or suggest a feature, or [send a pull request](https://github.com/morluto/rea/pulls)
-to improve the code or docs.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and checks,
-[testing](docs/testing.md) for verification lanes, and the
-[architecture map](docs/architecture.mermaid) for the project structure.
-
-## License
+## 授權條款
 
 [MIT](LICENSE)
 
-REA-authored code is licensed under MIT. Third-party material retains its own
-licenses and copyright notices; see
-[Third-party notices](THIRD_PARTY_NOTICES.md) for the dependency inventory,
-preserved license texts, and external-tool terms.
+REA 自行編寫的程式碼採用 MIT 授權；第三方內容保留各自的授權和著作權聲明。
+依賴清單、授權原文及外部工具條款見[第三方聲明](THIRD_PARTY_NOTICES.md)。
 
-**You must legally obtain and be authorized to use commercial tools**, including
-IDA Pro / Hex-Rays decompilers, Hopper, and JEB, under their applicable
-licenses. REA grants no tool license, key, or activation entitlement. Trials and
-demos remain subject to vendor terms, including user, feature, automation, and
-output sharing restrictions. Cracked copies, stolen keys, unauthorized key
-sharing, and bypassing license restrictions are not authorized. This guidance
-does not amend MIT or third-party licenses.
+**使用者須自行合法取得商用工具及所需使用權**，包括 IDA Pro / Hex-Rays 反編譯器、
+Hopper 和 JEB，並遵守各自授權。REA 不提供工具授權、金鑰或啟用權利；試用版和
+展示版也須遵守廠商對使用者、功能、自動化及輸出分享的限制。不得使用破解副本、
+竊取或違規共用金鑰，也不得繞過授權限制。本指引不變更 MIT 或第三方授權。
