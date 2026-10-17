@@ -19,7 +19,9 @@
 
 </div>
 
-> **Fork Notice**: This repository is a fork of [morluto/rea](https://github.com/morluto/rea).
+> **Fork Notice**: This repository is a fork of [morluto/rea](https://github.com/morluto/rea), maintained by [SanHsien/rea](https://github.com/SanHsien/rea).
+> This branch includes comprehensive Windows 11 native hardening (NTFS hard link fallback, cross-platform path resolution, Ghidra Linux fixture host adaptation, process tree termination timeouts, etc.).
+> For the complete review and hardening report, see [docs/records/codebase-review-and-windows-hardening-2026-10-17.md](docs/records/codebase-review-and-windows-hardening-2026-10-17.md).
 
 <div align="center">
 
@@ -297,7 +299,7 @@ npx rea-agents@latest setup
 ```
 
 If you're using an agent, complete the [setup refresh](#update-rea) and restart
-it. Retry the same task. If the problem persists, [open an issue](https://github.com/morluto/rea/issues)
+it. Retry the same task. If the problem persists, [open an issue](https://github.com/SanHsien/rea/issues)
 with your REA version, target type, steps to reproduce and error output.
 
 </details>
@@ -328,8 +330,8 @@ and analysis of software you own or are authorized to examine.
 
 ## Contributing
 
-We'd love your help with REA! [Open an issue](https://github.com/morluto/rea/issues) to
-report a bug or suggest a feature, or [send a pull request](https://github.com/morluto/rea/pulls)
+We'd love your help with REA! [Open an issue](https://github.com/SanHsien/rea/issues) to
+report a bug or suggest a feature, or [send a pull request](https://github.com/SanHsien/rea/pulls)
 to improve the code or docs.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and checks,

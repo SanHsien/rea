@@ -19,7 +19,9 @@
 
 </div>
 
-> **Fork 說明**：本專案為 [morluto/rea](https://github.com/morluto/rea) 的 Fork 分支。
+> **Fork 說明**：本專案為 [morluto/rea](https://github.com/morluto/rea) 的 Fork 分支，由 [SanHsien/rea](https://github.com/SanHsien/rea) 維護。
+> 本分支重點修復了 Windows 11 原生環境下的跨平臺檔案系統權限（NTFS Hard Link fallback）、路徑解析、Ghidra Linux fixture 宿主適配、進程樹銷毀超時等關鍵問題。
+> 詳細審查與強固化技術報告請參見 [docs/records/codebase-review-and-windows-hardening-2026-10-17.md](docs/records/codebase-review-and-windows-hardening-2026-10-17.md)。
 
 <div align="center">
 
@@ -234,7 +236,7 @@ rea update
 npx rea-agents@latest setup
 ```
 
-如果正在使用 AI 代理，請完成[設定更新](#更新-rea)並重新啟動 AI 代理。重試同一任務。如果問題仍然存在，請[提交 issue](https://github.com/morluto/rea/issues)，附上 REA 版本、目標類型、復現步驟和錯誤輸出。
+如果正在使用 AI 代理，請完成[設定更新](#更新-rea)並重新啟動 AI 代理。重試同一任務。如果問題仍然存在，請[提交 issue](https://github.com/SanHsien/rea/issues)，附上 REA 版本、目標類型、復現步驟和錯誤輸出。
 
 </details>
 
@@ -262,7 +264,7 @@ REA 用於合法的研究、教育、互通性、軟體保存，以及分析你�
 
 ## 參與貢獻
 
-歡迎幫助改進 REA！你可以[提交 issue](https://github.com/morluto/rea/issues) 報告錯誤或建議功能，也可以[提交 pull request](https://github.com/morluto/rea/pulls) 改進程式碼或文件。
+歡迎幫助改進 REA！你可以[提交 issue](https://github.com/SanHsien/rea/issues) 報告錯誤或建議功能，也可以[提交 pull request](https://github.com/SanHsien/rea/pulls) 改進程式碼或文件。
 
 開發設定和檢查見 [CONTRIBUTING.md](CONTRIBUTING.md)，驗證流程見[測試指南](docs/testing.md)，專案結構見[架構圖](docs/architecture.mermaid)。
 
