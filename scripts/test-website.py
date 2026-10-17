@@ -589,9 +589,9 @@ class WebsiteTranslationChecks(unittest.TestCase):
             worker.start()
             try:
                 base = f"http://127.0.0.1:{server.server_port}/rea/"
-                with urlopen(base + "ar/faq?test=1") as response:
-                    self.assertEqual(response.url, base + "ar/faq/?test=1")
-                    self.assertIn(b'lang="ar"', response.read())
+                with urlopen(base + "zh-TW/faq?test=1") as response:
+                    self.assertEqual(response.url, base + "zh-TW/faq/?test=1")
+                    self.assertIn(b'lang="zh-TW"', response.read())
                 with urlopen(base + "assets/i18n.js") as response:
                     self.assertIn(b"export function t", response.read())
                 with urlopen(base + "examples/notes-example.zip") as response:
