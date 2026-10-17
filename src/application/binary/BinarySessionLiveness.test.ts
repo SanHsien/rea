@@ -252,39 +252,39 @@ it("clears retired runtime availability after cancelled-switch restoration", asy
       ok: false,
       error: { _tag: "AnalysisCancelledError" },
     });
-  expect(session.activeTarget()).toEqual(originalTarget);
-  expect(deep.created).toHaveLength(1);
-  expect(deep.created[0]?.closeCalled).toBe(true);
-  const restoredStatus = await session.status();
-  expect(sessionRunId(restoredStatus)).not.toBe(initialRunId);
-  expect(await availability()).toMatchObject({
-    available: true,
-    reason: "available",
-    remediation: null,
-  });
-  // Cancellation remains the caller-visible outcome after cleanup and
-  // restoration, while the new restored client is healthy and usable.
-  expect((await session.execute("address_name", {})).ok).toBe(true);
-  expect(deep.created).toHaveLength(2);
-  expect(await availability()).toMatchObject({
-    available: true,
-    reason: "available",
-    remediation: null,
-  });
-  deep.created[1]?.setOperationFailure(true);
-  expect((await session.execute("address_name", {})).ok).toBe(false);
-  expect(await availability()).toMatchObject({
-    available: false,
-    reason: "provider_unavailable",
-  });
-  deep.created[1]?.setOperationFailure(false);
-  expect((await session.execute("address_name", {})).ok).toBe(true);
-  expect(await availability()).toMatchObject({
-    available: true,
-    reason: "available",
-    remediation: null,
-  });
-  await session.close();
+    expect(session.activeTarget()).toEqual(originalTarget);
+    expect(deep.created).toHaveLength(1);
+    expect(deep.created[0]?.closeCalled).toBe(true);
+    const restoredStatus = await session.status();
+    expect(sessionRunId(restoredStatus)).not.toBe(initialRunId);
+    expect(await availability()).toMatchObject({
+      available: true,
+      reason: "available",
+      remediation: null,
+    });
+    // Cancellation remains the caller-visible outcome after cleanup and
+    // restoration, while the new restored client is healthy and usable.
+    expect((await session.execute("address_name", {})).ok).toBe(true);
+    expect(deep.created).toHaveLength(2);
+    expect(await availability()).toMatchObject({
+      available: true,
+      reason: "available",
+      remediation: null,
+    });
+    deep.created[1]?.setOperationFailure(true);
+    expect((await session.execute("address_name", {})).ok).toBe(false);
+    expect(await availability()).toMatchObject({
+      available: false,
+      reason: "provider_unavailable",
+    });
+    deep.created[1]?.setOperationFailure(false);
+    expect((await session.execute("address_name", {})).ok).toBe(true);
+    expect(await availability()).toMatchObject({
+      available: true,
+      reason: "available",
+      remediation: null,
+    });
+    await session.close();
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }

@@ -130,16 +130,19 @@ describe("Apple asset catalog application workflow", () => {
         targetSha256: "a".repeat(64),
         runAssetUtil: () => Promise.resolve("[]"),
       });
-    expect(result.catalogs.map(({ path }) => path)).toEqual([
-      "Contents/Resources/Assets.car",
-    ]);
-    expect(result.limitations).toContainEqual(
-      expect.stringContaining("Contents/Resources/Nested/Assets.car (symlink)"),
-    );
-    expect(result.limitations).not.toContainEqual(
-      expect.stringContaining("No compiled Assets.car catalog"),
-    );
-  });
+      expect(result.catalogs.map(({ path }) => path)).toEqual([
+        "Contents/Resources/Assets.car",
+      ]);
+      expect(result.limitations).toContainEqual(
+        expect.stringContaining(
+          "Contents/Resources/Nested/Assets.car (symlink)",
+        ),
+      );
+      expect(result.limitations).not.toContainEqual(
+        expect.stringContaining("No compiled Assets.car catalog"),
+      );
+    },
+  );
 });
 
 it.each([1, 2])(

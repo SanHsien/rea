@@ -28,10 +28,7 @@ export const macHopperApplicationRoots = (
   homeDirectory: string,
 ): readonly string[] => [
   MAC_HOPPER_APPLICATION_DIRECTORY,
-  joinFor(homeDirectory)(
-    homeDirectory,
-    MAC_HOPPER_USER_APPLICATIONS_DIRECTORY,
-  ),
+  joinFor(homeDirectory)(homeDirectory, MAC_HOPPER_USER_APPLICATIONS_DIRECTORY),
 ];
 
 export const macHopperCanonicalLauncherCandidates = (

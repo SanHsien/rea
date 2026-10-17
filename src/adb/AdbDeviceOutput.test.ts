@@ -324,20 +324,21 @@ describe("parsePmPathOutput", () => {
   it.skipIf(process.platform === "win32")(
     "preserves whitespace and the exact POSIX device path",
     () => {
-    const devicePath = "/data/app/My App/résumé:final\\draft*.apk";
-    const { paths, rejectedPaths, unparsedLines } = parsePmPathOutput(
-      `package:${devicePath}\r\n`,
-    );
-    expect(paths).toEqual([
-      {
-        device_path: devicePath,
-        file_name: "résumé:final\\draft*.apk",
-        role: "unknown",
-      },
-    ]);
-    expect(rejectedPaths).toEqual([]);
-    expect(unparsedLines).toEqual([]);
-  });
+      const devicePath = "/data/app/My App/résumé:final\\draft*.apk";
+      const { paths, rejectedPaths, unparsedLines } = parsePmPathOutput(
+        `package:${devicePath}\r\n`,
+      );
+      expect(paths).toEqual([
+        {
+          device_path: devicePath,
+          file_name: "résumé:final\\draft*.apk",
+          role: "unknown",
+        },
+      ]);
+      expect(rejectedPaths).toEqual([]);
+      expect(unparsedLines).toEqual([]);
+    },
+  );
 
   it("rejects an empty final component without normalizing the source", () => {
     const devicePath = "/data/app/pkg/base.apk/";

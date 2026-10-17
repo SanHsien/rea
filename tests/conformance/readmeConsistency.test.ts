@@ -55,8 +55,11 @@ describe("onboarding documentation product facts", () => {
       .filter((name) => /^README_[A-Za-z0-9-]+\.md$/u.test(name))
       .map((name) => `docs/readme/${name}`);
     expect([...translatedReadmes].sort()).toEqual(editions.sort());
-    const englishReadme = inventory.find((l) => l.code === "en")?.readme ?? "README.en.md";
-    const english = shellExamples(await readFile(resolve(englishReadme), "utf8"));
+    const englishReadme =
+      inventory.find((l) => l.code === "en")?.readme ?? "README.en.md";
+    const english = shellExamples(
+      await readFile(resolve(englishReadme), "utf8"),
+    );
     for (const path of translatedReadmes)
       expect(
         shellExamples(await readFile(resolve(path), "utf8")),

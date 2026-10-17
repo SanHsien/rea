@@ -196,7 +196,10 @@ for (const variant of [
         await writeFile(join(original, "TestFile.txt"), "captured bytes");
         await writeFile(join(replacement, "TestFile.txt"), "replaced bytes");
         const alias = join(directory, "alias");
-        if (variant === "ancestor-junction" || variant === "replaced-junction") {
+        if (
+          variant === "ancestor-junction" ||
+          variant === "replaced-junction"
+        ) {
           try {
             await symlink(original, alias, "junction");
           } catch (cause: unknown) {

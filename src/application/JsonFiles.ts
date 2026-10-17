@@ -320,10 +320,12 @@ const publishFile = async (
           fileErrorCode(linkError) === "EXDEV" ||
           fileErrorCode(linkError) === "ENOSYS"
         ) {
-          const stillExisting = await lstat(destination).catch((cause: unknown) => {
-            if (fileErrorCode(cause) === "ENOENT") return undefined;
-            throw cause;
-          });
+          const stillExisting = await lstat(destination).catch(
+            (cause: unknown) => {
+              if (fileErrorCode(cause) === "ENOENT") return undefined;
+              throw cause;
+            },
+          );
           if (stillExisting !== undefined) {
             throw Object.assign(new Error("Destination file exists"), {
               code: "EEXIST",

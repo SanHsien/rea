@@ -501,7 +501,18 @@ describe("MSIX Claude Desktop uninstall", () => {
     const { home, env, appDataConfig, privateConfig } = await windowsProfile();
     await writeJson(join(dirname(privateConfig), "Preferences"), {});
     await mkdir(dirname(dirname(appDataConfig)), { recursive: true });
-    await symlink(dirname(privateConfig), dirname(appDataConfig), "dir");
+    try {
+      await symlink(dirname(privateConfig), dirname(appDataConfig), "dir");
+    } catch (cause: unknown) {
+      if (
+        process.platform === "win32" &&
+        cause instanceof Error &&
+        "code" in cause &&
+        cause.code === "EPERM"
+      )
+        return;
+      throw cause;
+    }
     const agents = join(env.APPDATA, "dsh", "agents");
     const manifest = join(
       agents,

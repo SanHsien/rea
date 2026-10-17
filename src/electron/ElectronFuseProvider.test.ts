@@ -326,32 +326,33 @@ describe("Electron fuse path and container admission", () => {
   it.skipIf(process.platform === "win32")(
     "refuses a framework symlink that leaves the bundle",
     async () => {
-    const root = await createTestTempDirectory("rea-electron-fuses-escape-");
-    const versions = join(
-      root,
-      "Fixture.app",
-      "Contents",
-      "Frameworks",
-      "Electron Framework.framework",
-      "Versions",
-    );
-    await mkdir(versions, { recursive: true });
-    await symlink("/etc", join(versions, "Current"));
-    const result = await provider.inspect({
-      path: join(root, "Fixture.app"),
-    });
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error).toMatchObject({
-      _tag: "AnalysisInputError",
-      issues: [
-        expect.objectContaining({
-          path: ["path"],
-          message: expect.stringContaining("escapes"),
-        }),
-      ],
-    });
-  });
+      const root = await createTestTempDirectory("rea-electron-fuses-escape-");
+      const versions = join(
+        root,
+        "Fixture.app",
+        "Contents",
+        "Frameworks",
+        "Electron Framework.framework",
+        "Versions",
+      );
+      await mkdir(versions, { recursive: true });
+      await symlink("/etc", join(versions, "Current"));
+      const result = await provider.inspect({
+        path: join(root, "Fixture.app"),
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toMatchObject({
+        _tag: "AnalysisInputError",
+        issues: [
+          expect.objectContaining({
+            path: ["path"],
+            message: expect.stringContaining("escapes"),
+          }),
+        ],
+      });
+    },
+  );
 });
 
 describe("Electron fuse container rejection and slice boundaries", () => {
@@ -405,107 +406,77 @@ describe("Electron fuse container rejection and slice boundaries", () => {
 describe.skipIf(process.platform === "win32")(
   "direct Electron Framework binary selection",
   () => {
-  const frameworkFixture = async (prefix: string) => {
-    const root = await createTestTempDirectory(prefix);
-    const app = join(root, "Fixture.app");
-    const framework = join(
-      app,
-      "Contents",
-      "Frameworks",
-      "Electron Framework.framework",
-    );
-    await mkdir(join(framework, "Versions"), { recursive: true });
-    return { app, framework };
-  };
+    const frameworkFixture = async (prefix: string) => {
+      const root = await createTestTempDirectory(prefix);
+      const app = join(root, "Fixture.app");
+      const framework = join(
+        app,
+        "Contents",
+        "Frameworks",
+        "Electron Framework.framework",
+      );
+      await mkdir(join(framework, "Versions"), { recursive: true });
+      return { app, framework };
+    };
 
-  it("resolves a binary selected through Versions/Current to its target", async () => {
-    const { framework } = await frameworkFixture("rea-electron-fuses-direct-");
-    await mkdir(join(framework, "Versions", "A"), { recursive: true });
-    const binary = join(framework, "Versions", "A", "Electron Framework");
-    await writeFile(binary, thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes);
-    await symlink("A", join(framework, "Versions", "Current"));
+    it("resolves a binary selected through Versions/Current to its target", async () => {
+      const { framework } = await frameworkFixture(
+        "rea-electron-fuses-direct-",
+      );
+      await mkdir(join(framework, "Versions", "A"), { recursive: true });
+      const binary = join(framework, "Versions", "A", "Electron Framework");
+      await writeFile(binary, thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes);
+      await symlink("A", join(framework, "Versions", "Current"));
 
-    const selected = join(
-      framework,
-      "Versions",
-      "Current",
-      "Electron Framework",
-    );
-    const report = await inspect(selected);
-    expect(report.artifact.selected_path).toBe(selected);
-    expect(report.artifact.resolved_path).toBe(binary);
-  });
-
-  it("follows symlinks before parent segments in a selected binary path", async () => {
-    const { framework } = await frameworkFixture("rea-electron-fuses-parent-");
-    const versions = join(framework, "Versions");
-    await mkdir(join(versions, "nested", "B"), { recursive: true });
-    await mkdir(join(versions, "nested", "A"), { recursive: true });
-    await mkdir(join(versions, "A"), { recursive: true });
-    const binary = join(versions, "nested", "A", "Electron Framework");
-    await writeFile(binary, thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes);
-    await writeFile(
-      join(versions, "A", "Electron Framework"),
-      sentinelFreeMacho(),
-    );
-    await symlink("nested/B", join(versions, "Current"));
-    const selected = `${versions}/Current/../A/Electron Framework`;
-    const report = await inspect(selected);
-    expect(report.artifact.selected_path).toBe(selected);
-    expect(report.artifact.resolved_path).toBe(binary);
-    expect(report.slices[0]?.sentinel_count).toBe(1);
-  });
-
-  it("rejects a binary selected through a Versions/Current link that leaves the framework", async () => {
-    const { app, framework } = await frameworkFixture(
-      "rea-electron-fuses-direct-escape-",
-    );
-    await mkdir(join(app, "Contents", "Other"), { recursive: true });
-    await writeFile(
-      join(app, "Contents", "Other", "Electron Framework"),
-      elfFuseImage([ELECTRON_FUSE_STATE_BYTES.enabled]).bytes,
-    );
-    await symlink("../../../Other", join(framework, "Versions", "Current"));
-
-    const result = await provider.inspect({
-      path: join(framework, "Versions", "Current", "Electron Framework"),
+      const selected = join(
+        framework,
+        "Versions",
+        "Current",
+        "Electron Framework",
+      );
+      const report = await inspect(selected);
+      expect(report.artifact.selected_path).toBe(selected);
+      expect(report.artifact.resolved_path).toBe(binary);
     });
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error).toMatchObject({
-      _tag: "AnalysisInputError",
-      issues: [
-        expect.objectContaining({
-          path: ["path"],
-          message: expect.stringContaining("escapes"),
-        }),
-      ],
+
+    it("follows symlinks before parent segments in a selected binary path", async () => {
+      const { framework } = await frameworkFixture(
+        "rea-electron-fuses-parent-",
+      );
+      const versions = join(framework, "Versions");
+      await mkdir(join(versions, "nested", "B"), { recursive: true });
+      await mkdir(join(versions, "nested", "A"), { recursive: true });
+      await mkdir(join(versions, "A"), { recursive: true });
+      const binary = join(versions, "nested", "A", "Electron Framework");
+      await writeFile(binary, thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes);
+      await writeFile(
+        join(versions, "A", "Electron Framework"),
+        sentinelFreeMacho(),
+      );
+      await symlink("nested/B", join(versions, "Current"));
+      const selected = `${versions}/Current/../A/Electron Framework`;
+      const report = await inspect(selected);
+      expect(report.artifact.selected_path).toBe(selected);
+      expect(report.artifact.resolved_path).toBe(binary);
+      expect(report.slices[0]?.sentinel_count).toBe(1);
     });
-  });
 
-  it("rejects a framework directory that is a symlink outside the bundle", async () => {
-    const root = await createTestTempDirectory(
-      "rea-electron-fuses-framework-link-",
-    );
-    const outside = join(root, "outside");
-    await mkdir(join(outside, "Versions", "A"), { recursive: true });
-    await writeFile(
-      join(outside, "Versions", "A", "Electron Framework"),
-      thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes,
-    );
-    const app = join(root, "Example.app");
-    const frameworks = join(app, "Contents", "Frameworks");
-    await mkdir(frameworks, { recursive: true });
-    const framework = join(frameworks, "Electron Framework.framework");
-    await symlink(outside, framework);
+    it("rejects a binary selected through a Versions/Current link that leaves the framework", async () => {
+      const { app, framework } = await frameworkFixture(
+        "rea-electron-fuses-direct-escape-",
+      );
+      await mkdir(join(app, "Contents", "Other"), { recursive: true });
+      await writeFile(
+        join(app, "Contents", "Other", "Electron Framework"),
+        elfFuseImage([ELECTRON_FUSE_STATE_BYTES.enabled]).bytes,
+      );
+      await symlink("../../../Other", join(framework, "Versions", "Current"));
 
-    for (const path of [
-      app,
-      join(framework, "Versions", "A", "Electron Framework"),
-    ]) {
-      const result = await provider.inspect({ path });
-      expect(result.ok, path).toBe(false);
-      if (result.ok) continue;
+      const result = await provider.inspect({
+        path: join(framework, "Versions", "Current", "Electron Framework"),
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
       expect(result.error).toMatchObject({
         _tag: "AnalysisInputError",
         issues: [
@@ -515,9 +486,44 @@ describe.skipIf(process.platform === "win32")(
           }),
         ],
       });
-    }
-  });
-});
+    });
+
+    it("rejects a framework directory that is a symlink outside the bundle", async () => {
+      const root = await createTestTempDirectory(
+        "rea-electron-fuses-framework-link-",
+      );
+      const outside = join(root, "outside");
+      await mkdir(join(outside, "Versions", "A"), { recursive: true });
+      await writeFile(
+        join(outside, "Versions", "A", "Electron Framework"),
+        thinFuseImage(OBSIDIAN_FUSE_BYTES).bytes,
+      );
+      const app = join(root, "Example.app");
+      const frameworks = join(app, "Contents", "Frameworks");
+      await mkdir(frameworks, { recursive: true });
+      const framework = join(frameworks, "Electron Framework.framework");
+      await symlink(outside, framework);
+
+      for (const path of [
+        app,
+        join(framework, "Versions", "A", "Electron Framework"),
+      ]) {
+        const result = await provider.inspect({ path });
+        expect(result.ok, path).toBe(false);
+        if (result.ok) continue;
+        expect(result.error).toMatchObject({
+          _tag: "AnalysisInputError",
+          issues: [
+            expect.objectContaining({
+              path: ["path"],
+              message: expect.stringContaining("escapes"),
+            }),
+          ],
+        });
+      }
+    });
+  },
+);
 
 it.skipIf(process.platform === "win32").each(["Contents", "Frameworks"])(
   "rejects a redirected %s for every app selection form",
@@ -636,7 +642,11 @@ it.skipIf(process.platform === "win32")(
       "Versions/Current/Electron Framework",
       join(framework, "Electron Framework"),
     );
-    for (const path of [app, framework, join(framework, "Electron Framework")]) {
+    for (const path of [
+      app,
+      framework,
+      join(framework, "Electron Framework"),
+    ]) {
       const report = await inspect(path);
       expect(report.artifact.resolved_path).toBe(
         join(framework, "Versions", "B", "Electron Framework"),
@@ -649,33 +659,34 @@ it.skipIf(process.platform === "win32")(
 it.skipIf(process.platform === "win32")(
   "rejects a checked version directory swapped before the reader opens it",
   async () => {
-  const root = await createTestTempDirectory("rea-electron-directory-swap-");
-  const app = join(root, "Fixture.app");
-  const framework = join(
-    app,
-    "Contents",
-    "Frameworks",
-    "Electron Framework.framework",
-  );
-  const version = join(framework, "Versions", "A");
-  const outside = join(root, "outside");
-  await mkdir(version, { recursive: true });
-  await mkdir(outside);
-  await writeFile(
-    join(version, "Electron Framework"),
-    thinFuseImage([0x30]).bytes,
-  );
-  await writeFile(
-    join(outside, "Electron Framework"),
-    thinFuseImage([0x31]).bytes,
-  );
-  const located = await resolveElectronFuseTarget(app);
-  await rename(version, `${version}.saved`);
-  await symlink(outside, version);
-  await expect(
-    readElectronFuseImage(located.file.path, { selection: located.file }),
-  ).rejects.toBeInstanceOf(RegularFileChangedError);
-});
+    const root = await createTestTempDirectory("rea-electron-directory-swap-");
+    const app = join(root, "Fixture.app");
+    const framework = join(
+      app,
+      "Contents",
+      "Frameworks",
+      "Electron Framework.framework",
+    );
+    const version = join(framework, "Versions", "A");
+    const outside = join(root, "outside");
+    await mkdir(version, { recursive: true });
+    await mkdir(outside);
+    await writeFile(
+      join(version, "Electron Framework"),
+      thinFuseImage([0x30]).bytes,
+    );
+    await writeFile(
+      join(outside, "Electron Framework"),
+      thinFuseImage([0x31]).bytes,
+    );
+    const located = await resolveElectronFuseTarget(app);
+    await rename(version, `${version}.saved`);
+    await symlink(outside, version);
+    await expect(
+      readElectronFuseImage(located.file.path, { selection: located.file }),
+    ).rejects.toBeInstanceOf(RegularFileChangedError);
+  },
+);
 
 it("reports a checked version directory removed before open as changed", async () => {
   const root = await createTestTempDirectory("rea-electron-directory-missing-");
