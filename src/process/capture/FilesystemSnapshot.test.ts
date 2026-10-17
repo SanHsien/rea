@@ -186,7 +186,7 @@ for (const variant of [
 ] as const) {
   it.runIf(process.platform === "win32")(
     `hashes only the captured Windows file through ${variant}`,
-    async () => {
+    async (ctx) => {
       const directory = await mkdtemp(join(tmpdir(), "rea-snapshot-windows-"));
       try {
         const original = join(directory, "original");
@@ -196,8 +196,21 @@ for (const variant of [
         await writeFile(join(original, "TestFile.txt"), "captured bytes");
         await writeFile(join(replacement, "TestFile.txt"), "replaced bytes");
         const alias = join(directory, "alias");
-        if (variant === "ancestor-junction" || variant === "replaced-junction")
-          await symlink(original, alias, "junction");
+        if (variant === "ancestor-junction" || variant === "replaced-junction") {
+          try {
+            await symlink(original, alias, "junction");
+          } catch (cause: unknown) {
+            if (
+              cause instanceof Error &&
+              "code" in cause &&
+              cause.code === "EPERM"
+            ) {
+              ctx.skip();
+              return;
+            }
+            throw cause;
+          }
+        }
         const path = join(
           variant.includes("junction") ? alias : original,
           variant === "case-alias" ? "testfile.txt" : "TestFile.txt",
@@ -205,7 +218,19 @@ for (const variant of [
         const expected = await lstat(path);
         if (variant === "replaced-junction") {
           await rm(alias);
-          await symlink(replacement, alias, "junction");
+          try {
+            await symlink(replacement, alias, "junction");
+          } catch (cause: unknown) {
+            if (
+              cause instanceof Error &&
+              "code" in cause &&
+              cause.code === "EPERM"
+            ) {
+              ctx.skip();
+              return;
+            }
+            throw cause;
+          }
         }
         const result = await hashFile(path, expected, 1_000);
         expect(result.state).toBe(

@@ -311,9 +311,31 @@ const publishFile = async (
     if (overwrite) {
       await rename(staged, destination);
       owner.recordPublishedRename();
+    } else {
+      try {
+        await link(staged, destination);
+      } catch (linkError: unknown) {
+        if (
+          fileErrorCode(linkError) === "EPERM" ||
+          fileErrorCode(linkError) === "EXDEV" ||
+          fileErrorCode(linkError) === "ENOSYS"
+        ) {
+          const stillExisting = await lstat(destination).catch((cause: unknown) => {
+            if (fileErrorCode(cause) === "ENOENT") return undefined;
+            throw cause;
+          });
+          if (stillExisting !== undefined) {
+            throw Object.assign(new Error("Destination file exists"), {
+              code: "EEXIST",
+            });
+          }
+          await rename(staged, destination);
+          owner.recordPublishedRename();
+        } else {
+          throw linkError;
+        }
+      }
     }
-    // A hard link publishes complete bytes atomically and cannot replace an existing name.
-    else await link(staged, destination);
     outcome = ok({ path: destination, bytes: written.value });
   } catch (cause: unknown) {
     outcome = err(cause);

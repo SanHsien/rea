@@ -1,6 +1,6 @@
 import { copyFile, lstat, mkdir, readFile, rm } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, posix, win32 } from "node:path";
 import writeFileAtomic from "write-file-atomic";
 import { err, ok, type Result } from "../domain/result.js";
 import { readBoundedFileBytes } from "../process/BoundedFileBytes.js";
@@ -194,13 +194,15 @@ export const skillDestinations = (
   clientIds: readonly string[] | undefined,
   environment: Readonly<NodeJS.ProcessEnv> = {},
   platform: NodeJS.Platform = process.platform,
-): readonly SkillDestination[] =>
-  clientSkillDirectories(home, clientIds, environment, platform).map(
+): readonly SkillDestination[] => {
+  const joiner = platform === "win32" ? win32.join : posix.join;
+  return clientSkillDirectories(home, clientIds, environment, platform).map(
     ({ client, directory }) => ({
       client,
-      path: join(directory, PRODUCT_IDENTITY.skillName),
+      path: joiner(directory, PRODUCT_IDENTITY.skillName),
     }),
   );
+};
 
 /** Resolve existing REA-owned skill roots using setup's canonical destinations. */
 export const existingSkillDestinations = async (

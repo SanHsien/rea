@@ -35,7 +35,10 @@ it("plans setup and uninstall against selected home and client overrides", async
   vi.stubEnv("CODEX_HOME", join(root, "ambient-codex"));
   vi.stubEnv("npm_command", "other");
   try {
-    const doctor = createDoctorHostFixture({ homeDirectory: environment.HOME });
+    const doctor = createDoctorHostFixture({
+      homeDirectory: environment.HOME,
+      platform: process.platform,
+    });
     const host = systemSetupHost(doctor, environment);
     const result = await runSetup(
       {
@@ -54,7 +57,7 @@ it("plans setup and uninstall against selected home and client overrides", async
           target: join(environment.CODEX_HOME, "config.toml"),
         }),
         expect.objectContaining({
-          id: "install_skill",
+          kind: "install_skill",
           target: join(
             environment.HOME,
             ".agents/skills",

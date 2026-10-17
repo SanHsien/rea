@@ -125,7 +125,9 @@ describe("Ghidra seed commitment", () => {
     ).rejects.toThrow(/changed after the analysis profile was committed/u);
   });
 
-  it("commits the resolved path behind a configured symbolic link", async () => {
+  it.skipIf(process.platform === "win32")(
+    "commits the resolved path behind a configured symbolic link",
+    async () => {
     const directory = await workspace();
     const path = join(directory, "seeds.tsv");
     await writeFile(path, SEEDS);

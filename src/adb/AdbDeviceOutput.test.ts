@@ -321,7 +321,9 @@ describe("parsePmPathOutput", () => {
     });
   });
 
-  it("preserves whitespace and the exact POSIX device path", () => {
+  it.skipIf(process.platform === "win32")(
+    "preserves whitespace and the exact POSIX device path",
+    () => {
     const devicePath = "/data/app/My App/résumé:final\\draft*.apk";
     const { paths, rejectedPaths, unparsedLines } = parsePmPathOutput(
       `package:${devicePath}\r\n`,

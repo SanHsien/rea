@@ -51,10 +51,21 @@ describe("real Hopper fixture binding", () => {
     try {
       await writeFile(join(outside, "c"), "primary");
       await rm(join(root ?? "", "c"));
-      await symlink(join(outside, "c"), join(root ?? "", "c"));
-      await expect(loadRealHopperFixtureTargets(manifest)).rejects.toThrow(
-        /escapes/u,
-      );
+      try {
+        await symlink(join(outside, "c"), join(root ?? "", "c"));
+        await expect(loadRealHopperFixtureTargets(manifest)).rejects.toThrow(
+          /escapes/u,
+        );
+      } catch (cause: unknown) {
+        if (
+          cause instanceof Error &&
+          "code" in cause &&
+          cause.code === "EPERM" &&
+          process.platform === "win32"
+        )
+          return;
+        throw cause;
+      }
     } finally {
       await rm(outside, { recursive: true, force: true });
     }

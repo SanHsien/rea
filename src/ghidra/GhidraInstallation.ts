@@ -485,7 +485,9 @@ const installationCoordinates = (
     // The configuration check rejects a relative JAVA_HOME. Probing it would
     // run whatever `bin/java` the current directory holds.
     java:
-      options.javaHome === undefined || path.isAbsolute(options.javaHome)
+      options.javaHome === undefined ||
+      path.isAbsolute(options.javaHome) ||
+      win32.isAbsolute(options.javaHome)
         ? host.probeJava(
             javaCommand,
             ghidraJavaEnvironment(
@@ -560,7 +562,9 @@ const configurationCheck = (
   javaHome: string | undefined,
   platform: NodeJS.Platform,
 ): GhidraInstallationCheck => {
-  const { isAbsolute } = platform === "win32" ? win32 : posix;
+  const isAbsolute = (targetPath: string) =>
+    (platform === "win32" ? win32 : posix).isAbsolute(targetPath) ||
+    win32.isAbsolute(targetPath);
   const relative = [
     ...(installDir !== null && !isAbsolute(installDir)
       ? ["GHIDRA_INSTALL_DIR"]

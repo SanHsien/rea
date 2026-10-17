@@ -101,7 +101,14 @@ export class WindowsOwnedProcess extends EventEmitter {
       throw new Error(
         "The bundled Windows native artifact does not support Job Object memory limits; use a matching current Windows x64 REA package.",
       );
-    const entries = Object.entries(environment)
+    const systemRoot =
+      process.env.SystemRoot ?? process.env.SYSTEMROOT ?? "C:\\Windows";
+    const resolvedEnv = Object.keys(environment).some(
+      (k) => k.toLowerCase() === "systemroot",
+    )
+      ? environment
+      : { SystemRoot: systemRoot, ...environment };
+    const entries = Object.entries(resolvedEnv)
       .filter((entry): entry is [string, string] => entry[1] !== undefined)
       .map(([key, value]) => `${key}=${value}`);
     const line = [

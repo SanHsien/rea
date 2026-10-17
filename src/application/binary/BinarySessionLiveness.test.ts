@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -217,17 +220,21 @@ it("clears retired runtime availability after cancelled-switch restoration", asy
   const originalTarget = session.activeTarget();
   const initialRunId = sessionRunId(session.status());
 
-  const controller = new AbortController();
-  const switching = session.open("/bin/ls", { signal: controller.signal });
-  await closing;
-  controller.abort();
-  releaseClose();
+  const tempDir = await mkdtemp(join(tmpdir(), "rea-liveness-"));
+  const switchTarget = join(tempDir, "switch.hop");
+  await writeFile(switchTarget, "switch");
+  try {
+    const controller = new AbortController();
+    const switching = session.open(switchTarget, { signal: controller.signal });
+    await closing;
+    controller.abort();
+    releaseClose();
 
-  const cancelled = await switching;
-  expect(cancelled).toMatchObject({
-    ok: false,
-    error: { _tag: "AnalysisCancelledError" },
-  });
+    const cancelled = await switching;
+    expect(cancelled).toMatchObject({
+      ok: false,
+      error: { _tag: "AnalysisCancelledError" },
+    });
   expect(session.activeTarget()).toEqual(originalTarget);
   expect(deep.created).toHaveLength(1);
   expect(deep.created[0]?.closeCalled).toBe(true);
@@ -261,6 +268,9 @@ it("clears retired runtime availability after cancelled-switch restoration", asy
     remediation: null,
   });
   await session.close();
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
 });
 
 const sessionRunId = (status: ReturnType<BinarySession["status"]>): string => {

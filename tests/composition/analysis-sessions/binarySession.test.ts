@@ -173,7 +173,9 @@ describe("detached provider and target metadata", () => {
   });
 });
 
-it("drains session calls and retires analysis after an admitted external mutation", async () => {
+it.skipIf(process.platform === "win32")(
+  "drains session calls and retires analysis after an admitted external mutation",
+  async () => {
   const [target] = await createBinarySessionTargets();
   const alias = join(dirname(target), "first-alias.hop");
   await symlink(target, alias);
@@ -262,7 +264,9 @@ it("leaves analysis unbound when a command returns before its writer finishes", 
   await session.close();
 });
 
-it("retires analysis when an external mutation uses a hard link", async () => {
+it.skipIf(process.platform === "win32")(
+  "retires analysis when an external mutation uses a hard link",
+  async () => {
   const [target] = await createBinarySessionTargets();
   const alias = join(dirname(target), "hard-link-alias.hop");
   await link(target, alias);

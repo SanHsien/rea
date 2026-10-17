@@ -110,7 +110,7 @@ describe.skipIf(process.platform === "win32")(
   },
 );
 
-describe("Hopper target leases", () => {
+describe.skipIf(process.platform === "win32")("Hopper target leases", () => {
   it("reports the owning REA session for a duplicate target and profile", async () => {
     const directory = await temporaryDirectory();
     const targetPath = await temporaryTarget();
@@ -220,7 +220,9 @@ describe("Hopper target leases", () => {
   );
 });
 
-describe("Linux Hopper application leases", () => {
+describe.skipIf(process.platform === "win32")(
+  "Linux Hopper application leases",
+  () => {
   it("reserves the shared application until its owner releases it", async () => {
     const directory = await temporaryDirectory();
     const first = await acquireLinuxHopperApplicationLease({
@@ -310,7 +312,9 @@ describe("Linux Hopper application leases", () => {
   });
 });
 
-it("leaves a stale socket unchanged while another process reserves its recovery", async () => {
+it.skipIf(process.platform === "win32")(
+  "leaves a stale socket unchanged while another process reserves its recovery",
+  async () => {
   const directory = await temporaryDirectory();
   const socketPath = await releasedApplicationSocket(directory);
   await leaveStaleSocket(socketPath);

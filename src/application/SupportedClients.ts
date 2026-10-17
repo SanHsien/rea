@@ -1,4 +1,4 @@
-import { dirname, isAbsolute, join, resolve, win32 } from "node:path";
+import { dirname, isAbsolute, join, posix, resolve, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
 import { lstatSync } from "node:fs";
 import { err, ok, type Result } from "../domain/result.js";
@@ -9,6 +9,9 @@ import {
 import { compareUnicodeCodePoints } from "../domain/unicodeCodePointOrder.js";
 import { resolveWindowsClaudeDesktopLocation } from "./ClaudeDesktopConfigLocation.js";
 import type { MsixPackageView } from "./MsixPackageStorage.js";
+
+const pathsFor = (platform: NodeJS.Platform = process.platform): typeof posix =>
+  platform === "win32" ? win32 : posix;
 
 /** One supported client configuration location. */
 export interface SetupClient {
@@ -161,8 +164,8 @@ const claudeDesktopLocation = (
 const claudeCodeConfigDirectory = ({ home, env }: ClientPathContext): string =>
   env.CLAUDE_CONFIG_DIR || home;
 
-const claudeCodeMarkerDirectory = ({ home, env }: ClientPathContext): string =>
-  env.CLAUDE_CONFIG_DIR || join(home, ".claude");
+const claudeCodeMarkerDirectory = ({ home, env, platform }: ClientPathContext): string =>
+  env.CLAUDE_CONFIG_DIR || pathsFor(platform).join(home, ".claude");
 
 const codexDirectory = ({ home, env }: ClientPathContext): string =>
   env.CODEX_HOME || join(home, ".codex");
@@ -487,9 +490,12 @@ export const SUPPORTED_CLIENT_DEFINITIONS = [
     name: "claude_code",
     displayName: "Claude Code",
     skillPath: (context: ClientPathContext) =>
-      join(claudeCodeMarkerDirectory(context), "skills"),
+      pathsFor(context.platform).join(claudeCodeMarkerDirectory(context), "skills"),
     configPath: (context: ClientPathContext) =>
-      join(claudeCodeConfigDirectory(context), ".claude.json"),
+      pathsFor(context.platform).join(
+        claudeCodeConfigDirectory(context),
+        ".claude.json",
+      ),
     markerPath: claudeCodeMarkerDirectory,
     format: "json",
   },
@@ -504,7 +510,7 @@ export const SUPPORTED_CLIENT_DEFINITIONS = [
     name: "codex",
     displayName: "Codex",
     configPath: (context: ClientPathContext) =>
-      join(codexDirectory(context), "config.toml"),
+      pathsFor(context.platform).join(codexDirectory(context), "config.toml"),
     markerPath: codexDirectory,
     format: "toml",
   },
@@ -725,8 +731,9 @@ const resolvePath = (
   path: ClientPath,
   context: ClientPathContext,
 ): ClientPathResult => {
+  const joiner = context.platform === "win32" ? win32.join : posix.join;
   const resolved =
-    typeof path === "function" ? path(context) : join(context.home, ...path);
+    typeof path === "function" ? path(context) : joiner(context.home, ...path);
   return typeof resolved === "string" ? ok(resolved) : resolved;
 };
 
@@ -834,7 +841,7 @@ export const clientSkillDirectories = (
     try {
       const resolved =
         definition?.skillPath === undefined
-          ? ok(join(home, ".agents", "skills"))
+          ? ok((platform === "win32" ? win32.join : posix.join)(home, ".agents", "skills"))
           : resolvePath(definition.skillPath, {
               home,
               platform,

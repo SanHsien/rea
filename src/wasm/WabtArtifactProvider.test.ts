@@ -220,9 +220,11 @@ it("retries a retained input descriptor before admitting the next WABT operation
   const path = join(root, "selected.wasm");
   await writeFile(path, Buffer.alloc(76, 1));
   for (const tool of ["wasm-validate", "wasm-objdump", "wasm2wat"])
-    await writeFile(join(root, tool), "source-owned executable seam", {
-      mode: 0o700,
-    });
+    await writeFile(
+      join(root, `${tool}${process.platform === "win32" ? ".exe" : ""}`),
+      "source-owned executable seam",
+      { mode: 0o700 },
+    );
   const dump = await readFile(
     new URL("../../tests/fixtures/wasm/objdump.txt", import.meta.url),
     "utf8",

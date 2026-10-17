@@ -10,7 +10,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, posix } from "node:path";
 import { promisify } from "node:util";
 
 import { z } from "zod";
@@ -191,7 +191,10 @@ export const installMacHopper = async (
             : { cleanupFailure: installation.cleanupFailure }),
         };
       bundleCleanupFailure = installation.cleanupFailure;
-      const launcherPath = join(destination, "Contents/MacOS/hopper");
+      const launcherPath = (destination.startsWith("/") ? posix.join : join)(
+        destination,
+        "Contents/MacOS/hopper",
+      );
       let openFailure: string | undefined;
       try {
         await host.openApplication(destination);

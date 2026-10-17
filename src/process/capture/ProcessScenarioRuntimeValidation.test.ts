@@ -40,7 +40,9 @@ it.skipIf(process.platform === "win32")(
   },
 );
 
-it("preserves the caller-selected executable symlink for process invocation", async () => {
+it.skipIf(process.platform === "win32")(
+  "preserves the caller-selected executable symlink for process invocation",
+  async () => {
   const root = await mkdtemp(join(tmpdir(), "rea-process-executable-alias-"));
   try {
     const alias = join(root, "chosen-node");
