@@ -1,0 +1,89 @@
+"""Contract tests for tools/check_dependency_freshness.py."""
+
+from __future__ import annotations
+
+import unittest
+
+import json
+import tempfile
+from pathlib import Path
+
+from check_dependency_freshness import FreshnessError, classify, is_newer, load_deferrals, render
+
+
+def outdated(pinned: str, latest: str) -> dict[str, dict]:
+    return {"pkg": {"wanted": pinned, "latest": latest}}
+
+
+class IsNewerTests(unittest.TestCase):
+    def test_orders_numerically_not_lexically(self) -> None:
+        self.assertTrue(is_newer("1.10.0", "1.9.0"))
+        self.assertFalse(is_newer("1.9.0", "1.10.0"))
+
+    def test_equal_is_not_newer(self) -> None:
+        self.assertFalse(is_newer("2.0.0", "2.0.0"))
+
+    def test_prerelease_latest_is_not_an_upgrade_target(self) -> None:
+        self.assertFalse(is_newer("1.2.0-beta.18", "1.1.0"))
+
+    def test_non_semver_is_never_newer(self) -> None:
+        self.assertFalse(is_newer("latest", "1.0.0"))
+
+
+class ClassifyTests(unittest.TestCase):
+    def test_current_pin_produces_no_row(self) -> None:
+        self.assertEqual(classify(outdated("1.0.0", "1.0.0"), {}), [])
+
+    def test_stale_pin_without_deferral_needs_evaluation(self) -> None:
+        (row,) = classify(outdated("1.0.0", "1.1.0"), {})
+        self.assertFalse(row["deferred"])
+
+    def test_deferral_covers_up_to_deferred_latest(self) -> None:
+        deferral = {"pkg": {"deferredLatest": "1.1.0", "reason": "follows upstream"}}
+        (row,) = classify(outdated("1.0.0", "1.1.0"), deferral)
+        self.assertTrue(row["deferred"])
+
+    def test_deferral_lapses_when_registry_moves_past_it(self) -> None:
+        deferral = {"pkg": {"deferredLatest": "1.1.0", "reason": "follows upstream"}}
+        (row,) = classify(outdated("1.0.0", "1.2.0"), deferral)
+        self.assertFalse(row["deferred"])
+
+    def test_deferral_without_reason_is_ignored(self) -> None:
+        deferral = {"pkg": {"deferredLatest": "1.1.0", "reason": "  "}}
+        (row,) = classify(outdated("1.0.0", "1.1.0"), deferral)
+        self.assertFalse(row["deferred"])
+
+
+    def test_non_semver_deferred_latest_never_covers(self) -> None:
+        deferral = {"pkg": {"deferredLatest": "latest", "reason": "follows upstream"}}
+        (row,) = classify(outdated("1.0.0", "9.0.0"), deferral)
+        self.assertFalse(row["deferred"])
+
+
+class LoadDeferralsTests(unittest.TestCase):
+    def load(self, payload: object) -> dict:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "deferrals.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            return load_deferrals(path)
+
+    def test_valid_entry_loads(self) -> None:
+        entry = {"deferredLatest": "1.2.3", "reason": "x"}
+        self.assertEqual(self.load({"pkg": entry}), {"pkg": entry})
+
+    def test_non_object_entry_is_a_clean_error(self) -> None:
+        with self.assertRaises(FreshnessError):
+            self.load({"pkg": "oops"})
+
+    def test_non_semver_deferred_latest_is_a_clean_error(self) -> None:
+        with self.assertRaises(FreshnessError):
+            self.load({"pkg": {"deferredLatest": "8.x", "reason": "x"}})
+
+
+class RenderTests(unittest.TestCase):
+    def test_empty_report_says_current(self) -> None:
+        self.assertIn("all direct pins are current", render([]))
+
+
+if __name__ == "__main__":
+    unittest.main()

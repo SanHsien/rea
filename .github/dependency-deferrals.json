@@ -1,0 +1,154 @@
+{
+  "@babel/parser": {
+    "deferredLatest": "8.0.8",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@babel/types": {
+    "deferredLatest": "8.0.8",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@clack/prompts": {
+    "deferredLatest": "1.8.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@electron/asar": {
+    "deferredLatest": "4.3.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@modelcontextprotocol/client": {
+    "deferredLatest": "2.4.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@modelcontextprotocol/server": {
+    "deferredLatest": "2.4.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@stryker-mutator/core": {
+    "deferredLatest": "10.1.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@stryker-mutator/typescript-checker": {
+    "deferredLatest": "10.1.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@stryker-mutator/vitest-runner": {
+    "deferredLatest": "10.1.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@types/node": {
+    "deferredLatest": "26.6.5",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@types/semver": {
+    "deferredLatest": "7.8.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@types/ws": {
+    "deferredLatest": "8.18.2",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@vitest/coverage-v8": {
+    "deferredLatest": "5.0.5",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "@zip.js/zip.js": {
+    "deferredLatest": "2.24.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "canonicalize": {
+    "deferredLatest": "5.1.0",
+    "reason": "跨 major（3→5）；序列化結果影響證據雜湊，需上游先評估。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "cborg": {
+    "deferredLatest": "6.1.5",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "evmole": {
+    "deferredLatest": "0.9.4",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "frida": {
+    "deferredLatest": "17.24.3",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "ignore": {
+    "deferredLatest": "7.0.14",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "incur": {
+    "deferredLatest": "0.7.1",
+    "reason": "0.7.1 產生 --schema 時沒帶 io:\"input\"，需另行處理後處理邏輯。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "isomorphic-git": {
+    "deferredLatest": "1.44.4",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "jscpd": {
+    "deferredLatest": "5.4.2",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "knip": {
+    "deferredLatest": "6.43.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "lint-staged": {
+    "deferredLatest": "17.6.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "lossless-json": {
+    "deferredLatest": "4.3.3",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "oxfmt": {
+    "deferredLatest": "0.74.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "oxlint": {
+    "deferredLatest": "1.89.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "playwright-core": {
+    "deferredLatest": "1.64.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "rolldown": {
+    "deferredLatest": "1.2.15",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "smol-toml": {
+    "deferredLatest": "1.9.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "tokenx": {
+    "deferredLatest": "2.2.0",
+    "reason": "跨 major（1→2）；token 估算影響回傳大小預算，需上游先評估。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "turbo": {
+    "deferredLatest": "2.11.10",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "typescript-termux:typescript@5.9.3": {
+    "deferredLatest": "7.0.2",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "typescript6:typescript@6.0.3": {
+    "deferredLatest": "7.0.2",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "vitest": {
+    "deferredLatest": "5.0.5",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "write-file-atomic": {
+    "deferredLatest": "8.0.0",
+    "reason": "跨 major（7→8）；檔案寫入語意變動，需上游先評估。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "ws": {
+    "deferredLatest": "8.22.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "yaml": {
+    "deferredLatest": "2.9.1",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  }
+}

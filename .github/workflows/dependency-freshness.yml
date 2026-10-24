@@ -1,0 +1,66 @@
+name: Dependency freshness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - package-lock.json
+      - tools/check_dependency_freshness.py
+      - .github/dependency-deferrals.json
+      - .github/workflows/dependency-freshness.yml
+  schedule:
+    - cron: "17 2 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-freshness
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Dependency freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Test the checker
+        run: python -m unittest discover -s tools -p 'test_check_dependency_freshness.py' -v
+
+      - name: Compare pins with the registry
+        id: freshness
+        continue-on-error: true
+        run: python tools/check_dependency_freshness.py --output dependency-freshness-report.md
+
+      - name: Publish report
+        if: always()
+        run: cat dependency-freshness-report.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Require evaluation when a pin is stale
+        if: always() && steps.freshness.outcome == 'failure'
+        run: |
+          echo "::error::A direct dependency pin is behind the registry without a current deferral. See the workflow summary."
+          exit 1

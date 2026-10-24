@@ -1,0 +1,48 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # package.json pins every direct dependency exactly and follows upstream
+  # (morluto/rea); a pin changes when an upstream sync brings it, not through
+  # weekly version PRs. A limit of 0 turns version updates off and leaves
+  # Dependabot security updates, which are not subject to the limit, running.
+  # Staleness of the pins is reported separately by dependency-freshness.yml.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 0
+    labels: ["dependencies", "javascript"]
+    commit-message:
+      prefix: "build"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/website"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 0
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "build"
+      include: "scope"
