@@ -44,6 +44,14 @@ const REJECTED: readonly (readonly [string, string])[] = [
 
 const CASES = [...ACCEPTED, ...REJECTED];
 
+/**
+ * Zod 4.6 adopted RFC 3339 and rejects a time that carries `Z` or an offset but
+ * omits seconds; Zod 4.4 accepted it. This project keeps accepting it so the
+ * CLI and MCP inputs do not narrow, so the Zod oracle is allowed to differ for
+ * exactly this case. Any other divergence is still a failure.
+ */
+const INTENTIONAL_ZOD_DIVERGENCES: readonly string[] = ["omitted seconds"];
+
 describe("offset datetime schema", () => {
   it.each(ACCEPTED)("accepts %s", (_label, value) => {
     expect(offsetDateTimeSchema.safeParse(value).success).toBe(true);
@@ -53,13 +61,29 @@ describe("offset datetime schema", () => {
     expect(offsetDateTimeSchema.safeParse(value).success).toBe(false);
   });
 
-  it("classifies every case exactly as the replaced Zod validator does", () => {
+  it("classifies every case as the replaced Zod validator does, except the named omitted-seconds case", () => {
     const divergences = CASES.filter(
       ([, value]) =>
         offsetDateTimeSchema.safeParse(value).success !==
         replaced.safeParse(value).success,
     ).map(([label]) => label);
-    expect(divergences).toEqual([]);
+    expect(divergences).toEqual([...INTENTIONAL_ZOD_DIVERGENCES]);
+  });
+
+  it("keeps accepting a time with omitted seconds, which the public CLI and MCP inputs have always allowed", () => {
+    for (const value of [
+      "2026-10-09T04:00Z",
+      "2026-10-09T04:00+02:00",
+      "2026-10-09T04:00-03:00",
+    ])
+      expect(offsetDateTimeSchema.safeParse(value).success, value).toBe(true);
+    // Seconds stay optional, but a half-written time is still rejected.
+    expect(offsetDateTimeSchema.safeParse("2026-10-09T04Z").success).toBe(
+      false,
+    );
+    expect(offsetDateTimeSchema.safeParse("2026-10-09T04:0Z").success).toBe(
+      false,
+    );
   });
 
   it("emits a pattern that compiles in every mode a client may use", () => {

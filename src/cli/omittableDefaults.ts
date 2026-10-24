@@ -54,9 +54,22 @@ const withOmittableDefaults = (schema: z.ZodObject): z.ZodObject => {
   );
 };
 
-/** Zod accepts an omitted value (`optin`) but always produces one (`optout`). */
+/**
+ * Zod accepts an omitted value (`optin`) but always produces one (`optout`).
+ *
+ * Zod 4.4 reports a `.default()` field's `optin` as `"optional"`; Zod 4.6
+ * reports `"defaulted"`. Both mean "the parser fills an omitted value", so a
+ * field that is merely optional (`optout` is `"optional"`) never matches.
+ *
+ * This whole module exists because Incur's `Schema.js` calls `z.toJSONSchema`
+ * without `io: "input"` (observed in incur 0.6.1 and 0.7.1), so Zod 4.6 lists
+ * every defaulted field as required in `--schema`, `--llms`, and MCP output.
+ * Remove it once Incur passes `io: "input"` and
+ * `tests/boundary/cli/cliInputSchemaRequired.test.ts` stays green without it.
+ */
 const fillsOmission = (field: z.ZodType): boolean =>
-  field._zod.optin === "optional" && field._zod.optout === undefined;
+  (field._zod.optin === "optional" || field._zod.optin === "defaulted") &&
+  field._zod.optout === undefined;
 
 const optionalWithMetadata = (field: z.ZodType): z.ZodType => {
   const metadata = field.meta();
