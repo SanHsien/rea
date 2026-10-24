@@ -62,8 +62,10 @@ const withOmittableDefaults = (schema: z.ZodObject): z.ZodObject => {
  * field that is merely optional (`optout` is `"optional"`) never matches.
  *
  * This whole module exists because Incur's `Schema.js` calls `z.toJSONSchema`
- * without `io: "input"` (observed in incur 0.6.1 and 0.7.1), so Zod 4.6 lists
- * every defaulted field as required in `--schema`, `--llms`, and MCP output.
+ * without `io: "input"` (observed in incur 0.6.1 and 0.7.1), so Zod's output
+ * view lists every defaulted field as required in `--schema`, `--llms`, and MCP
+ * output. That has been true since Zod 4.4; the only 4.6 change this module had
+ * to follow is the `optin` value above.
  * Remove it once Incur passes `io: "input"` and
  * `tests/boundary/cli/cliInputSchemaRequired.test.ts` stays green without it.
  */
