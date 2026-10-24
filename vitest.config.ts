@@ -64,8 +64,11 @@ const PROJECT_POLICIES = {
     // cleanup. Reuse the immutable graph; module mocks belong in process-global.
     isolate: false,
     // Long-lived workers should collect temporary command/schema allocations
-    // before their two heaps compete with the real CLI child processes.
-    execArgv: ["--max-old-space-size=384"],
+    // before their two heaps compete with the real CLI child processes. Files
+    // that also open the in-process MCP harness load the tool catalog and
+    // server graph into the shared module graph; under V8 coverage the live
+    // heap after full GC reaches about 380 MB, so keep roughly 2x headroom.
+    execArgv: ["--max-old-space-size=768"],
   },
   "process-boundary": {
     pool: "forks" as const,
