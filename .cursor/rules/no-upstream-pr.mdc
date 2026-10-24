@@ -1,0 +1,15 @@
+---
+description: PR、push、release 一律指向 SanHsien/rea；回貢上游需要當次對話明確同意
+alwaysApply: true
+---
+
+這個 repo 是 `morluto/rea` 的 fork。PR、push、release 一律指向 `SanHsien/rea`，不指向上游。
+
+- `gh` 在 fork clone 的**預設 repo 就是上游**，裸跑 `gh pr create` 必然打上去。每個 clone 先跑
+  一次 `gh repo set-default SanHsien/rea`。
+- 開 PR 明寫 `--repo SanHsien/rea --base <分支> --head <分支>`，並**讀輸出的 URL 確認 owner**。
+- 唯一例外：維護者在**當次對話**明確說要回貢上游。「fork 一份」「建開發環境」「比照其他 repo」
+  都不是同意。
+
+2026-08-22 維護者的其他 fork 曾在一天內兩次誤把 PR 開到上游。這個 repo 本身沒有機器層攔截，
+這份規則是唯一的防線，所以每次開 PR 前都要照上面的步驟確認 owner。

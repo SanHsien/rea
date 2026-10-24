@@ -1,0 +1,11 @@
+{
+  "repo": "https://github.com/morluto/rea.git",
+  "branch": "main",
+  "track": "commit",
+  "reviewed_release": "v6.5.0",
+  "reviewed_through": "988494abdbb27fb91ca6bd80362c9f1a332f86c3",
+  "reviewed_date": "2026-10-17",
+  "reviewed_pr_through": 4705,
+  "reviewed_issue_through": 4705,
+  "decision_log": "docs/records/upstream-sync-evaluation-2026-10-17.md"
+}

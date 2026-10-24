@@ -1,0 +1,9 @@
+[
+  { "code": "en", "name": "English", "readme": "README.en.md", "dir": "ltr" },
+  {
+    "code": "zh-TW",
+    "name": "繁體中文",
+    "readme": "docs/readme/README_zh-TW.md",
+    "dir": "ltr"
+  }
+]
