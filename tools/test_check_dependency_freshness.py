@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import io
+import sys
 import unittest
+from unittest import mock
 
 import json
 import tempfile
 from pathlib import Path
 
+import check_dependency_freshness as freshness
 from check_dependency_freshness import FreshnessError, classify, is_newer, load_deferrals, render
 
 
@@ -89,6 +93,20 @@ class LoadDeferralsTests(unittest.TestCase):
 class RenderTests(unittest.TestCase):
     def test_empty_report_says_current(self) -> None:
         self.assertIn("all direct pins are current", render([]))
+
+
+class MainTests(unittest.TestCase):
+    def test_non_ascii_reason_does_not_crash_on_a_narrow_console(self) -> None:
+        stale = {"pkg": {"wanted": "1.0.0", "latest": "1.1.0"}}
+        deferral = {"pkg": {"deferredLatest": "1.1.0", "reason": "跟隨上游"}}
+        raw = io.BytesIO()
+        console = io.TextIOWrapper(raw, encoding="cp1252")
+        with (
+            mock.patch.object(freshness, "run_outdated", return_value=stale),
+            mock.patch.object(freshness, "load_deferrals", return_value=deferral),
+            mock.patch.object(sys, "stdout", console),
+        ):
+            self.assertEqual(freshness.main([]), 0)
 
 
 if __name__ == "__main__":

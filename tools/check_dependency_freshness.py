@@ -130,6 +130,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="also write the report to this file")
     args = parser.parse_args(argv)
+    # Deferral reasons are free text; a narrow console codec must not abort the run.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="replace")
     try:
         rows = classify(run_outdated(), load_deferrals())
     except FreshnessError as exc:
