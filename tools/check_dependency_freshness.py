@@ -42,11 +42,12 @@ def is_newer(candidate: str, base: str) -> bool:
     """True when ``candidate`` is a newer stable release than ``base``.
 
     A prerelease ``latest`` (a dist-tag pointing at a beta) is not an upgrade target.
+    A stable release is newer than a prerelease of the same ``major.minor.patch``.
     """
     new, old = parse_version(candidate), parse_version(base)
     if new is None or old is None or not new[3]:
         return False
-    return new[:3] > old[:3]
+    return new > old
 
 
 def load_deferrals(path: Path = DEFERRALS_PATH) -> dict[str, dict]:

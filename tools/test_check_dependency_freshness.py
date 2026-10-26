@@ -29,6 +29,12 @@ class IsNewerTests(unittest.TestCase):
     def test_non_semver_is_never_newer(self) -> None:
         self.assertFalse(is_newer("latest", "1.0.0"))
 
+    def test_stable_release_is_newer_than_prerelease_of_same_version(self) -> None:
+        self.assertTrue(is_newer("1.0.0", "1.0.0-rc.1"))
+
+    def test_prerelease_pin_behind_newer_stable_is_stale(self) -> None:
+        self.assertTrue(is_newer("1.1.0", "1.0.0-rc.1"))
+
 
 class ClassifyTests(unittest.TestCase):
     def test_current_pin_produces_no_row(self) -> None:
