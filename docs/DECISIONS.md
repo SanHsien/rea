@@ -1,6 +1,14 @@
 # 決策紀錄
 
 - **上游基準**：`morluto/rea` `main`（MIT）。
+- **2026-10-27 同步到上游 `rea-agents-6.8.0`：以 release 為單位的淨樹同步（PLAYBOOK §5 的有記錄例外）**：
+  - 規模：前次水位 `988494a` 之後 1914 個 commit、約 +99 萬行，PR 1017 筆、issue 1321 筆。fork 是壓縮過的單一歷史、與上游沒有共同祖先，§5 的「逐項移植」在這個量體做不到。
+  - 作法：本機建立一個從未推送的合成 commit（父為 `988494a`、樹等於 fork `main`）恢復三方合併的共同基底，合併 `rea-agents-6.8.0` 解完衝突後，只把合併結果的樹以單一 commit 接在 fork `main` 上；上游歷史不進 fork。
+  - 目標選正式版本而不是 `main` 尖端：上游一天多次變動，正式版本是上游驗過的穩定點。之後仍以正式版本為粒度追蹤：`tools/upstream_baseline.json` 改為 `track: release`（`release_tag_prefix: rea-agents-`、`ticket_cutoff: release`），發布後才開的 PR／issue 留給下一個正式版本一起看；`tools/check_upstream_updates.py` 換成 repo-fleet-ops 正本（`84bc069`，逐位元組相同），workflow 以 `--ticket-cap 3000` 執行。
+  - 保留：Windows 強化（上游已有等效修正的採上游）、繁中預設 README 與只留英文／繁中的語系政策、`zod` 4.6.7 與 `fast-uri` 3.1.9 安全修補。
+  - Workflow：發佈鏈 `release.yml`（`merged-release`、`release-please`）、`release-recovery.yml`（`verify`）、`website-pages.yml`（`prepare`）加上 `github.repository == 'morluto/rea'` 守衛，fork 不會發佈 npm／MCP Registry 或部署網站。
+  - 衝突處理、workflow 與供應鏈審查、PR／issue 分流與觸發條件：[`docs/records/upstream-sync-evaluation-2026-10-27.md`](records/upstream-sync-evaluation-2026-10-27.md)。
+  - 本機驗證用 Node 24.22.1（`.nvmrc`）：Node 26 已移除 `stripTypeScriptTypes` 的 `mode: "transform"`，`scripts/lib/verifier-source-loader.mjs` 會丟 `ERR_INVALID_ARG_VALUE`（上游程式，未改）。
 - **只留 `main` 分支，不提前合併上游 WIP 分支**：
   - 138 條分支（舊 release、修復分支、實驗分支與 bot 分支）名稱與 SHA 留存於 [`docs/records/removed-branches-2026-10-16.tsv`](records/removed-branches-2026-10-16.tsv)。
   - 分流評估詳見 [`docs/records/upstream-branch-evaluation-2026-10-16.md`](records/upstream-branch-evaluation-2026-10-16.md)：因上游屬超高頻迭代專案，提前合併 WIP 分支易造成未來同步嚴重衝突；採「跟隨上游主線 `main`」，未來實測遇到特定問題時再按紀錄提取對應修復。

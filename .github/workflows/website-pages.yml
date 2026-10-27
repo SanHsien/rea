@@ -21,7 +21,8 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.ref == 'refs/heads/main'
+    # Fork guard: rea.tools deployment (Cloudflare, Pages) belongs to upstream.
+    if: github.ref == 'refs/heads/main' && github.repository == 'morluto/rea'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

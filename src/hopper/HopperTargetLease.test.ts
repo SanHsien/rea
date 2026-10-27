@@ -1,3 +1,4 @@
+import { requirePermissionDenial } from "../../tests/fixtures/permissionDenial.js";
 import { execFile } from "node:child_process";
 import { once } from "node:events";
 import {
@@ -31,6 +32,8 @@ afterEach(async () => {
       .map((directory) => rm(directory, { recursive: true, force: true })),
   );
 });
+
+const describePosix = describe.skipIf(process.platform === "win32");
 
 describe.skipIf(process.platform === "win32")(
   "Hopper lease directory admission",
@@ -73,9 +76,10 @@ describe.skipIf(process.platform === "win32")(
       expect((await lstat(alias)).isSymbolicLink()).toBe(true);
     });
 
-    it.skipIf(process.getuid?.() === 0)(
+    it.skipIf(process.platform === "win32")(
       "explains unreadable directory recovery without changing unverified permissions",
-      async () => {
+      async (context) => {
+        await requirePermissionDenial(context, "directory-read");
         const directory = await temporaryDirectory();
         await chmod(directory, 0o333);
         try {
@@ -110,7 +114,7 @@ describe.skipIf(process.platform === "win32")(
   },
 );
 
-describe.skipIf(process.platform === "win32")("Hopper target leases", () => {
+describePosix("Hopper target leases", () => {
   it("reports the owning REA session for a duplicate target and profile", async () => {
     const directory = await temporaryDirectory();
     const targetPath = await temporaryTarget();
@@ -220,101 +224,130 @@ describe.skipIf(process.platform === "win32")("Hopper target leases", () => {
   );
 });
 
-describe.skipIf(process.platform === "win32")(
-  "Linux Hopper application leases",
-  () => {
-    it("reserves the shared application until its owner releases it", async () => {
-      const directory = await temporaryDirectory();
-      const first = await acquireLinuxHopperApplicationLease({
-        directory,
-        runId: "first",
+describePosix("Linux Hopper application leases", () => {
+  it("reserves the shared application until its owner releases it", async () => {
+    const directory = await temporaryDirectory();
+    const first = await acquireLinuxHopperApplicationLease({
+      directory,
+      runId: "first",
+    });
+    expect(first.acquired).toBe(true);
+    if (!first.acquired) return;
+    try {
+      expect(
+        await acquireLinuxHopperApplicationLease({
+          directory,
+          runId: "second",
+        }),
+      ).toMatchObject({
+        acquired: false,
+        owner: { runId: "first", processId: process.pid },
       });
-      expect(first.acquired).toBe(true);
-      if (!first.acquired) return;
+    } finally {
+      await first.lease.release();
+    }
+    const reopened = await acquireLinuxHopperApplicationLease({
+      directory,
+      runId: "third",
+    });
+    expect(reopened.acquired).toBe(true);
+    if (reopened.acquired) await reopened.lease.release();
+  });
+
+  it.each(["silent", "malformed", "invalid-pid", "closed"] as const)(
+    "keeps a live endpoint when its owner response is %s",
+    async (behavior) => {
+      const directory = await temporaryDirectory();
+      const socketPath = await releasedApplicationSocket(directory);
+      let responsive = false;
+      const sockets = new Set<Socket>();
+      const owner = { runId: "existing-owner", processId: process.pid };
+      const server = createServer((socket) => {
+        sockets.add(socket);
+        socket.on("close", () => sockets.delete(socket));
+        socket.on("error", () => undefined);
+        if (responsive) socket.end(`${JSON.stringify(owner)}\n`);
+        else if (behavior === "malformed") socket.end("not JSON\n");
+        else if (behavior === "invalid-pid")
+          socket.end('{"runId":"existing-owner","processId":-1}\n');
+        else if (behavior === "closed") socket.end();
+      });
+      server.listen(socketPath);
+      await once(server, "listening");
       try {
+        await expect(
+          acquireLinuxHopperApplicationLease({
+            directory,
+            runId: "new-owner",
+          }),
+        ).rejects.toMatchObject({
+          _tag: "HopperStartError",
+          userMessage: expect.stringContaining("left unchanged"),
+        });
+        expect((await lstat(socketPath)).isSocket()).toBe(true);
+        responsive = true;
         expect(
           await acquireLinuxHopperApplicationLease({
             directory,
-            runId: "second",
+            runId: "retry",
           }),
-        ).toMatchObject({
+        ).toEqual({
           acquired: false,
-          owner: { runId: "first", processId: process.pid },
+          owner,
         });
       } finally {
-        await first.lease.release();
+        for (const socket of sockets) socket.destroy();
+        server.close();
+        await once(server, "close");
       }
-      const reopened = await acquireLinuxHopperApplicationLease({
-        directory,
-        runId: "third",
+    },
+  );
+
+  it("preserves a Unicode owner identity split across socket writes", async () => {
+    const directory = await temporaryDirectory();
+    const socketPath = await releasedApplicationSocket(directory);
+    const owner = { runId: "session-中文-🔬", processId: process.pid };
+    const response = Buffer.from(`${JSON.stringify(owner)}\n`);
+    const split = response.indexOf(Buffer.from("中")) + 1;
+    const sockets = new Set<Socket>();
+    const server = createServer((socket) => {
+      sockets.add(socket);
+      socket.on("close", () => sockets.delete(socket));
+      socket.on("error", () => undefined);
+      socket.write(response.subarray(0, split), () => {
+        // Let the client consume the incomplete UTF-8 sequence before the tail.
+        setImmediate(() =>
+          setImmediate(() => socket.end(response.subarray(split))),
+        );
       });
-      expect(reopened.acquired).toBe(true);
-      if (reopened.acquired) await reopened.lease.release();
     });
-
-    it.each(["silent", "malformed", "invalid-pid", "closed"] as const)(
-      "keeps a live endpoint when its owner response is %s",
-      async (behavior) => {
-        const directory = await temporaryDirectory();
-        const socketPath = await releasedApplicationSocket(directory);
-        let responsive = false;
-        const sockets = new Set<Socket>();
-        const owner = { runId: "existing-owner", processId: process.pid };
-        const server = createServer((socket) => {
-          sockets.add(socket);
-          socket.on("close", () => sockets.delete(socket));
-          socket.on("error", () => undefined);
-          if (responsive) socket.end(`${JSON.stringify(owner)}\n`);
-          else if (behavior === "malformed") socket.end("not JSON\n");
-          else if (behavior === "invalid-pid")
-            socket.end('{"runId":"existing-owner","processId":-1}\n');
-          else if (behavior === "closed") socket.end();
-        });
-        server.listen(socketPath);
-        await once(server, "listening");
-        try {
-          await expect(
-            acquireLinuxHopperApplicationLease({
-              directory,
-              runId: "new-owner",
-            }),
-          ).rejects.toMatchObject({
-            _tag: "HopperStartError",
-            userMessage: expect.stringContaining("left unchanged"),
-          });
-          expect((await lstat(socketPath)).isSocket()).toBe(true);
-          responsive = true;
-          expect(
-            await acquireLinuxHopperApplicationLease({
-              directory,
-              runId: "retry",
-            }),
-          ).toEqual({
-            acquired: false,
-            owner,
-          });
-        } finally {
-          for (const socket of sockets) socket.destroy();
-          server.close();
-          await once(server, "close");
-        }
-      },
-    );
-
-    it("recovers a socket left by a process that exited without releasing it", async () => {
-      const directory = await temporaryDirectory();
-      const socketPath = await releasedApplicationSocket(directory);
-      await leaveStaleSocket(socketPath);
+    server.listen(socketPath);
+    await once(server, "listening");
+    try {
+      expect(
+        await acquireLinuxHopperApplicationLease({ directory, runId: "next" }),
+      ).toEqual({ acquired: false, owner });
       expect((await lstat(socketPath)).isSocket()).toBe(true);
-      const recovered = await acquireLinuxHopperApplicationLease({
-        directory,
-        runId: "recovered",
-      });
-      expect(recovered.acquired).toBe(true);
-      if (recovered.acquired) await recovered.lease.release();
+    } finally {
+      for (const socket of sockets) socket.destroy();
+      server.close();
+      await once(server, "close");
+    }
+  });
+
+  it("recovers a socket left by a process that exited without releasing it", async () => {
+    const directory = await temporaryDirectory();
+    const socketPath = await releasedApplicationSocket(directory);
+    await leaveStaleSocket(socketPath);
+    expect((await lstat(socketPath)).isSocket()).toBe(true);
+    const recovered = await acquireLinuxHopperApplicationLease({
+      directory,
+      runId: "recovered",
     });
-  },
-);
+    expect(recovered.acquired).toBe(true);
+    if (recovered.acquired) await recovered.lease.release();
+  });
+});
 
 it.skipIf(process.platform === "win32")(
   "leaves a stale socket unchanged while another process reserves its recovery",

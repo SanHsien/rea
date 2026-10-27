@@ -1,6 +1,7 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createTestTempDirectory } from "../../../tests/fixtures/temporaryDirectory.js";
+import { elf } from "../../domain/binaryTarget.fixture.js";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -39,6 +40,39 @@ import { SessionProviderRouter } from "./SessionProviderRouter.js";
  * `operationHealthSnapshot`, the way `HopperClient.operationHealth` reports a
  * recorded process exit.
  */
+it("binds omitted provider subjects to the selected target", async () => {
+  const { session } = openSession();
+  try {
+    const opened = await session.open(process.execPath);
+    expect(opened.ok).toBe(true);
+    const execution = await session.execute("address_name", {});
+    expect(execution.ok).toBe(true);
+    if (!execution.ok || !opened.ok) return;
+    expect(execution.value.subject).toEqual({
+      path: opened.value.path,
+      sha256: opened.value.sha256,
+      format: opened.value.format,
+      ...(opened.value.architecture === undefined
+        ? {}
+        : { architecture: opened.value.architecture }),
+    });
+  } finally {
+    await session.close();
+  }
+});
+
+it("preserves an explicitly unbound provider observation", async () => {
+  const { session } = openSession({ explicitNullSubject: true });
+  try {
+    expect((await session.open(process.execPath)).ok).toBe(true);
+    const execution = await session.execute("address_name", {});
+    expect(execution.ok).toBe(true);
+    if (execution.ok) expect(execution.value.subject).toBeNull();
+  } finally {
+    await session.close();
+  }
+});
+
 describe("BinarySession open liveness", () => {
   it("retires a locally blocked owner even when its native health is idle", async () => {
     const { session, deep } = openSession();
@@ -237,57 +271,55 @@ it("clears retired runtime availability after cancelled-switch restoration", asy
   const originalTarget = session.activeTarget();
   const initialRunId = sessionRunId(await session.status());
 
-  const tempDir = await mkdtemp(join(tmpdir(), "rea-liveness-"));
-  const switchTarget = join(tempDir, "switch.hop");
-  await writeFile(switchTarget, "switch");
-  try {
-    const controller = new AbortController();
-    const switching = session.open(switchTarget, { signal: controller.signal });
-    await closing;
-    controller.abort();
-    releaseClose();
+  const controller = new AbortController();
+  const alternate = join(
+    await createTestTempDirectory("rea-liveness-switch-"),
+    "alternate.elf",
+  );
+  await writeFile(alternate, elf(2, 1, 62));
+  const switching = session.open(alternate, { signal: controller.signal });
+  await closing;
+  controller.abort();
+  releaseClose();
 
-    const cancelled = await switching;
-    expect(cancelled).toMatchObject({
-      ok: false,
-      error: { _tag: "AnalysisCancelledError" },
-    });
-    expect(session.activeTarget()).toEqual(originalTarget);
-    expect(deep.created).toHaveLength(1);
-    expect(deep.created[0]?.closeCalled).toBe(true);
-    const restoredStatus = await session.status();
-    expect(sessionRunId(restoredStatus)).not.toBe(initialRunId);
-    expect(await availability()).toMatchObject({
-      available: true,
-      reason: "available",
-      remediation: null,
-    });
-    // Cancellation remains the caller-visible outcome after cleanup and
-    // restoration, while the new restored client is healthy and usable.
-    expect((await session.execute("address_name", {})).ok).toBe(true);
-    expect(deep.created).toHaveLength(2);
-    expect(await availability()).toMatchObject({
-      available: true,
-      reason: "available",
-      remediation: null,
-    });
-    deep.created[1]?.setOperationFailure(true);
-    expect((await session.execute("address_name", {})).ok).toBe(false);
-    expect(await availability()).toMatchObject({
-      available: false,
-      reason: "provider_unavailable",
-    });
-    deep.created[1]?.setOperationFailure(false);
-    expect((await session.execute("address_name", {})).ok).toBe(true);
-    expect(await availability()).toMatchObject({
-      available: true,
-      reason: "available",
-      remediation: null,
-    });
-    await session.close();
-  } finally {
-    await rm(tempDir, { recursive: true, force: true });
-  }
+  const cancelled = await switching;
+  expect(cancelled).toMatchObject({
+    ok: false,
+    error: { _tag: "AnalysisCancelledError" },
+  });
+  expect(session.activeTarget()).toEqual(originalTarget);
+  expect(deep.created).toHaveLength(1);
+  expect(deep.created[0]?.closeCalled).toBe(true);
+  const restoredStatus = await session.status();
+  expect(sessionRunId(restoredStatus)).not.toBe(initialRunId);
+  expect(await availability()).toMatchObject({
+    available: true,
+    reason: "available",
+    remediation: null,
+  });
+  // Cancellation remains the caller-visible outcome after cleanup and
+  // restoration, while the new restored client is healthy and usable.
+  expect((await session.execute("address_name", {})).ok).toBe(true);
+  expect(deep.created).toHaveLength(2);
+  expect(await availability()).toMatchObject({
+    available: true,
+    reason: "available",
+    remediation: null,
+  });
+  deep.created[1]?.setOperationFailure(true);
+  expect((await session.execute("address_name", {})).ok).toBe(false);
+  expect(await availability()).toMatchObject({
+    available: false,
+    reason: "provider_unavailable",
+  });
+  deep.created[1]?.setOperationFailure(false);
+  expect((await session.execute("address_name", {})).ok).toBe(true);
+  expect(await availability()).toMatchObject({
+    available: true,
+    reason: "available",
+    remediation: null,
+  });
+  await session.close();
 });
 
 const sessionRunId = (
@@ -350,6 +382,7 @@ const openSession = (
     operationHealth?: boolean;
     failOperationInitially?: boolean;
     beforeFirstClose?: () => Promise<void>;
+    explicitNullSubject?: boolean;
   } = {},
 ): {
   session: BinarySession;
@@ -384,6 +417,7 @@ const killableDeepProvider = (options: {
   operationHealth?: boolean;
   failOperationInitially?: boolean;
   beforeFirstClose?: () => Promise<void>;
+  explicitNullSubject?: boolean;
 }): {
   provider: AnalysisProviderCandidate;
   created: KillableChild[];
@@ -434,6 +468,10 @@ const killableDeepProvider = (options: {
                   createAnalysisExecution(
                     operation === "health" ? null : `liveness:${operation}`,
                     deepIdentity,
+                    operation !== "health" &&
+                      options.explicitNullSubject === true
+                      ? { subject: null }
+                      : {},
                   ),
                 ),
               )

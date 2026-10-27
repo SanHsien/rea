@@ -19,7 +19,8 @@ concurrency:
 jobs:
   verify:
     name: Verify existing published package
-    if: github.ref == 'refs/heads/main'
+    # Fork guard: MCP Registry publication belongs to upstream.
+    if: github.ref == 'refs/heads/main' && github.repository == 'morluto/rea'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

@@ -52,12 +52,12 @@ describe("Hopper provider discovery", () => {
   );
 
   it.runIf(process.platform === "win32")(
-    "reports unsupported_host on Windows",
+    "reports Hopper integration as unsupported on Windows",
     () => {
       expect(provider(process.execPath).inspectAvailability()).toMatchObject({
         status: "unavailable",
         code: "unsupported_host",
-        reason: "Hopper integration is not supported on win32.",
+        diagnostics: { platform: "win32" },
       });
     },
   );

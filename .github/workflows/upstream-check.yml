@@ -43,7 +43,7 @@ jobs:
       - name: Check upstream
         id: upstream
         continue-on-error: true
-        run: python tools/check_upstream_updates.py --strict
+        run: python tools/check_upstream_updates.py --strict --ticket-cap 3000
 
       - name: Publish report
         if: always()
