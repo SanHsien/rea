@@ -80,8 +80,8 @@
     "reason": "0.7.1 產生 --schema 時沒帶 io:\"input\"，需另行處理後處理邏輯。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "isomorphic-git": {
-    "deferredLatest": "1.44.4",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "1.44.5",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "jscpd": {
     "deferredLatest": "5.4.2",
@@ -100,16 +100,20 @@
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "oxfmt": {
-    "deferredLatest": "0.74.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "0.75.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "oxlint": {
-    "deferredLatest": "1.89.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "1.90.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "playwright-core": {
     "deferredLatest": "1.64.1",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "release-please": {
+    "deferredLatest": "17.11.2",
+    "reason": "scripts/lib/release-proposal.mjs（由 scripts/prepare.mjs 呼叫）套用 patches/release-please+17.3.0.patch 前會檢查版本必須是 17.3.0，升級需上游一併更新 patch。本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "rolldown": {
     "deferredLatest": "1.2.15",
@@ -118,6 +122,10 @@
   "smol-toml": {
     "deferredLatest": "1.9.1",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+  },
+  "stream-chain": {
+    "deferredLatest": "4.3.0",
+    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "tokenx": {
     "deferredLatest": "2.2.0",

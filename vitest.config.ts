@@ -62,12 +62,10 @@ const PROJECT_POLICIES = {
     maxWorkers: MAX_TEST_WORKERS,
     // CLI tests create fresh command instances or subprocesses and own their
     // cleanup. Reuse the immutable graph; module mocks belong in process-global.
-    // Long-lived workers should collect temporary command/schema allocations
-    // before their two heaps compete with the real CLI child processes. Files
-    // that also open the in-process MCP harness load the tool catalog and
-    // server graph into the shared module graph; under V8 coverage the live
-    // heap after full GC reaches about 380 MB, so keep roughly 2x headroom.
-    execArgv: ["--max-old-space-size=768"],
+    // The shared source/contract graph also needs transient schema/help space.
+    // Ordinary CI exhausted 384 MiB after earlier files warmed that graph.
+    // Use the measured 512 MiB budget with the same bounded concurrency.
+    execArgv: ["--max-old-space-size=512"],
   },
   "process-boundary": {
     pool: "forks" as const,
