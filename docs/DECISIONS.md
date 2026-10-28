@@ -12,6 +12,18 @@
   - `tests/boundary/cli/cliJsonStdinCli.test.ts`（與 `tests/fixtures/cliJsonStdinProbe.mjs`）改用上游 `main` `e3066c170` 的版本：fork 的 `zod` 4.6.7 改變子程序啟動時的堆積用量，6.8.0 版測試的固定輸入大小剛好落在邊界；上游升級 zod 時改成依子程序實際堆積上限計算輸入大小。
   - Dependabot 警示 #5（`qs`，GHSA-6pq8-jhm2-2vcw，medium，dev）：上游以 `overrides.typed-rest-client.qs` 釘在 6.16.0（受影響範圍 `>= 6.7.0, <= 6.16.0`），fork 把 override 升到修補版 6.16.1（同 minor 的修補版，鎖檔只變這一筆，來源 registry.npmjs.org、沒有 install script），`npm audit` 為 0。上游跟進後回到上游值。
   - 本機驗證用 Node 24.22.1（`.nvmrc`）：Node 26 已移除 `stripTypeScriptTypes` 的 `mode: "transform"`，`scripts/lib/verifier-source-loader.mjs` 會丟 `ERR_INVALID_ARG_VALUE`（上游程式，未改）。
+- **2026-10-28 `src/` 底下 12 筆 CodeQL 告警的判讀（上游程式帶進來，fork 未改這些行）**：8 筆在產品程式、4 筆在 `src/` 內的測試檔。逐筆讀原始碼與 CodeQL 資料流，沒有一筆需要在 fork 先修；理由也寫在各告警的 dismiss 說明上。
+  - 誤報（false positive）：
+    - #119 `src/hopper/HopperFileOffset.ts:138`、#31 `src/filesystem/RegularFile.ts:103`（`js/insecure-temporary-file`）：兩處都是 `open(path, O_RDONLY | O_NONBLOCK …)`，沒有 `O_CREAT`，不會在暫存目錄建立檔案；CodeQL 資料流裡的暫存目錄來源全部在 `*.test.ts`。
+    - #97 `src/native/SignatureTargetBinding.ts:329`（`js/file-system-race`）：`lstat` 後以 `O_NOFOLLOW` 開檔，再用 `fstat` 比對 dev／ino（`identity(opened) !== identity(before)` 即中止），正是避免 TOCTOU 的寫法。
+    - #38 `src/artifacts/SafeOutputTree.ts:317`：讀回時以 `O_NOFOLLOW` 開檔，`hashOutputFile` 會比對 `fileIdentity` 與內容雜湊。
+  - 真實但低風險，不修（won't fix）：以下都是「先檢查、再用路徑讀」的空檔，但被讀的檔案都在本程式自己的目錄（同一使用者），能在空檔換檔的人本來就能直接改這些檔案，沒有跨權限邊界。
+    - #96 `src/application/decompileDirectory/exportTree.ts:606`：`lstat` 後 `open(O_NOFOLLOW)`，未再比對身分；讀的是使用者指定輸出目錄裡本程式寫的 journal。上游 `main` 同一段完全相同。
+    - #41 `src/javascript/analysis/JavaScriptAnalysisWorker.ts:714`：`stat` 檢查大小後 `readFile(path)`；檔案在 runtime 自有的 `PrivateRuntimeRoot`（POSIX 上是 `mkdtemp`，只有擁有者可寫）。上游 `main` 仍是同樣寫法（只改成讀 bytes）。
+    - #42 `src/kuna/KunaProjectCache.ts:1062`：`stat` 檢查大小後 `readFile`；manifest 在 `REA_KUNA_CACHE_DIR`（或使用者快取）下。上游 `main` 已改寫這段（`8b7ee48a4` 等），仍是先 `lstat` 再讀。
+    - #39 `src/flutter/FlutterBuildProvider.ts:1046`：重新開啟本程式剛寫進 `mkdtemp` 目錄的 `libapp.so`，緩衝區固定為宣告大小 +1，不會超讀。上游 `main` 相同。
+  - 測試碼（used in tests）：#45、#46 `src/process/capture/FilesystemSnapshot.test.ts:69/161` 是測試故意換掉檔案來驗證身分偵測；#19、#20 `src/process/ExecFileOutput.test.ts:130/218` 用 `JSON.stringify` 把測試自己的暫存路徑組進子程序腳本。
+  - 重新評估的觸發條件：下次同步上游後 CodeQL 重掃仍報；任一路徑改為讀取其他使用者可寫的位置（共用目錄、未經 `mkdtemp` 的暫存路徑）；或上游修掉其中一處（那時隨同步採用）。
 - **只留 `main` 分支，不提前合併上游 WIP 分支**：
   - 138 條分支（舊 release、修復分支、實驗分支與 bot 分支）名稱與 SHA 留存於 [`docs/records/removed-branches-2026-10-16.tsv`](records/removed-branches-2026-10-16.tsv)。
   - 分流評估詳見 [`docs/records/upstream-branch-evaluation-2026-10-16.md`](records/upstream-branch-evaluation-2026-10-16.md)：因上游屬超高頻迭代專案，提前合併 WIP 分支易造成未來同步嚴重衝突；採「跟隨上游主線 `main`」，未來實測遇到特定問題時再按紀錄提取對應修復。
