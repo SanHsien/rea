@@ -1,0 +1,39 @@
+# 路線圖
+
+> 本 repo 後續工作的單一真相源。做完一項，就在同一個 commit 刪掉那一列；新工作只加在這裡。
+> 現況段的數字是 2026-10-29 依 `main` `5fd7693e9974` 查的快照，開工前先重查 GitHub。
+
+本檔只管本 fork 的維護工作；REA 產品本身的方向寫在上游持有的 [`docs/roadmap.md`](docs/roadmap.md)，本 fork 不改那一份。
+
+## 現況
+`morluto/rea` 的 Windows 優先維護 fork（以 agent 做逆向工程的 CLI／MCP 工具）。2026-10-27 以 release 為單位淨樹同步到上游 `rea-agents-6.8.0`，水位 PR #7097、issue #7095（`tools/upstream_baseline.json`、[`docs/DECISIONS.md`](docs/DECISIONS.md)）；發佈鏈都加了 `github.repository == 'morluto/rea'` 守衛，fork 不發版。
+2026-10-29 查：open PR 0、Dependabot open alert 0；code scanning open 93 筆（critical 3、high 56、medium 34），`src/` 底下已在 10-28 判讀並 dismiss 為 0，剩下的在 `tests/`、`scripts/`、`.github/workflows/`、`bridge/`；CI、CodeQL、Mutation sweep、Upstream check 最近一次 success，Release 為 skipped（fork 守衛）；issues 已停用，open issue 數「未查到」（查法：`gh api "repos/SanHsien/rea/code-scanning/alerts?state=open&per_page=100" --paginate`、`gh run list -R SanHsien/rea -b main`）。
+
+## 近期：可以直接動手
+| 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
+| --- | --- | --- | --- | --- |
+| 判讀 `scripts/` 的 critical `js/request-forgery`（#7、#8、#77） | 這幾筆是目前 open 告警裡等級最高的，`src/` 以外還沒人逐筆看過 | 每筆讀原始碼與 CodeQL 資料流，結論（誤報／真實但不修／修）寫進 `docs/DECISIONS.md`；dismiss 的告警帶具體理由，要修的先寫會失敗的測試；`gh api repos/SanHsien/rea/code-scanning/alerts/<n>` 的 state 與結論一致 | Claude Opus | code scanning #7 `scripts/fixtures/page-cdp-proxy.mjs`、#8 `scripts/lib/browser-scenario-service-worker-setup-e2e.mjs`、#77 `scripts/verify-package-update.mjs` |
+| 判讀 `release.yml` 與 `release-recovery.yml` 的 cache-poisoning／untrusted-checkout 告警 | 這些 high／medium 告警在發佈鏈 workflow，兩個檔同屬發佈鏈、適用同一判準；fork 已加守衛不發版，但要確認每個被標的 job 都在守衛之下，而不是假設 | 逐筆列出被標的 job 與它 `needs` 的根 job 是否帶 `github.repository == 'morluto/rea'`；不可達的以理由 dismiss，可達的修並在 `docs/DECISIONS.md` 記為偏離上游 | Claude Opus | code scanning #2、#3、#5、#74、#75、#76（`.github/workflows/release.yml`）、#1、#4（`.github/workflows/release-recovery.yml`）；[`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-27「Workflow」段 |
+| 分批判讀前兩列以外的所有 open 告警（`tests/`、`tests/fixtures/`、`scripts/` 非 critical、`bridge/ghidra/ReaGhidraBridge.java` #6） | 測試碼那批多是測試故意製造的檔案競態或測試自己組的路徑；`bridge/` 的 #6（`java/regex-injection`，high）是產品 Java 程式，不能套「測試碼」理由，要單獨判讀；不清掉，真正的新告警會淹沒在裡面 | 同一規則同一類情境合併判讀，dismiss 理由寫具體位置與「測試碼」根據（`bridge/` 的 #6 另寫產品碼根據）；`docs/DECISIONS.md` 一條總結；完成後 open 告警只剩判讀為「要修」的項目 | Claude Sonnet（#6 由 Claude Opus 判讀） | code scanning open 清單（`tests/boundary` 為大宗）、#6（`bridge/ghidra/ReaGhidraBridge.java`）；2026-10-28 `src/` 判讀的同一判準（[`docs/DECISIONS.md`](docs/DECISIONS.md) 對應條目） |
+| 更正 `docs/DECISIONS.md`「只留最新 tag（`rea-agents-6.5.0`）」條目 | 程式已同步到 6.8.0，但 fork 刻意不發版也不推新 tag，舊條目讓人以為 6.5.0 代表目前版本 | 條目改寫為「fork 不發版、tag 停在 6.5.0、程式對應的上游版本看 `tools/upstream_baseline.json`」；`git ls-remote --tags origin` 與條目一致 | Claude Haiku | `docs/DECISIONS.md:35`；`.github/workflows/release.yml` 的 fork 守衛 |
+| `GhidraInstallation` 的 Windows 絕對路徑判斷收窄到磁碟機代號 | fork 刻意讓「磁碟機代號的 `JAVA_HOME` 在任何主機都算絕對路徑」，但實作用 `win32.isAbsolute`，連 `\jdk` 這種沒有磁碟機代號的根相對路徑也算進去 | 改成只認磁碟機代號 pattern，保留原本意圖；新增測試：`C:\jdk` 在任何主機都算絕對、`\jdk` 在 POSIX 主機不算；CI 綠 | Claude Sonnet | `src/ghidra/GhidraInstallation.ts:548-553`、`:702-704`；[`docs/records/upstream-sync-evaluation-2026-10-27.md`](docs/records/upstream-sync-evaluation-2026-10-27.md) §3 |
+
+## 中期：等條件成立再做
+| 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
+| --- | --- | --- | --- | --- |
+| 同步上游下一個正式版本 | 上游發佈 `rea-agents-6.8.0` 之後的正式版（`Upstream check` 失敗） | 照 2026-10-27 的淨樹同步做法並寫新的 `docs/records/upstream-sync-evaluation-<日期>.md`；隨同處理 issue #7121（DOS MZ）；vitest 以同步前後逐測試差集比對，回歸全修；推進 `tools/upstream_baseline.json`；`Upstream check`、CI success | Claude Opus | [`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-27；`tools/upstream_baseline.json`（`track: release`、`ticket_cutoff: release`） |
+| 撤回「測試選擇改以檔案傳遞」的偏離 | 上游修掉同一缺陷，或改成不經環境變數傳遞 | 改回上游的 `ci.yml`、`scripts/ci/plan.mjs`、`scripts/ci/test-report.mjs`；push 的 CI `Portable tests` 仍 success | Claude Sonnet | [`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-28「偏離上游：測試選擇」 |
+| 撤回 fork 端的相依因應：`qs` override 回上游值、`presentOmittableDefaults` 後處理移除 | 上游把 `qs` override 移出受影響範圍；`incur` 呼叫 `z.toJSONSchema` 時帶 `io: "input"` | 移除後 `npm audit` 為 0；`--schema`／`--llms`／MCP 輸出的 `required` 相關測試全綠 | Codex | [`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-27 Dependabot #5 段、2026-10-24 zod 段 |
+| `cli-boundary` worker 堆積上限回到 768 MB | full tier 加 coverage 再出現 `JavaScript heap out of memory` | `vitest.config.ts` 與 `ciTestProjects` 測試同步改值；手動 full tier run success | Codex | [`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-24 `cli-boundary` 條目 |
+| Windows Ghidra `java_home.save` 拒絕存取（上游 issue #7075） | 上游合併修正，或本機 `rea doctor` 全綠但 Ghidra 啟動出現同樣錯誤 | 隨同步或單獨移植；維護者在 Windows 實機用 Ghidra 分析一個檔案成功 | 維護者 | [`docs/records/upstream-sync-evaluation-2026-10-27.md`](docs/records/upstream-sync-evaluation-2026-10-27.md) §5 |
+
+## 刻意不做
+| 不做什麼 | 理由 | 什麼情況下重新考慮 |
+| --- | --- | --- |
+| 追上游 `main` 尖端或提前合併上游 WIP 分支／未合併 PR（含 Windows 的 #5317、#6326、#6410、#5391） | 上游一天多次變動，以正式版本為同步粒度；提前合併 WIP 會讓之後的同步嚴重衝突（[`docs/DECISIONS.md`](docs/DECISIONS.md)「只留 `main` 分支」） | 維護者在本機實際遇到其中某個問題 |
+| 從 fork 發佈 npm／MCP Registry 套件或部署網站 | 發佈鏈已加 `morluto/rea` 守衛（[`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-27「Workflow」） | fork 決定獨立發行 |
+| 讓上游新增、只保證 POSIX 的測試在 Windows 全數通過 | 上游明言原始碼測試不保證在 Windows 通過（上游 #6308）；fork 以同步前後差集判斷回歸 | 上游改為保證 Windows 測試 |
+| 用 `rea mcp add` 的 Windows 修補（#5811／#6347）；對上游開 PR 或留言 | 替代作法是 `rea setup --client`；對外只打 `SanHsien/rea`（`.cursor/rules/no-upstream-pr.mdc`） | 上游合併該修補；維護者在當次對話明確同意回貢 |
+
+## 維護方式
+上游：追 release 軌，`Upstream check` 每週跑；上游發新正式版才整批淨樹同步，發布後才開的 PR／issue 留到下一版。依賴：Dependabot 與月度新鮮度檢查，落後的釘版寫進 `.github/dependency-deferrals.json`；本機驗證用 `.nvmrc` 的 Node 24（Node 26 會讓 `scripts/lib/verifier-source-loader.mjs` 失敗）。
