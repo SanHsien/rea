@@ -107,9 +107,17 @@ it("merges available failed-shard diagnostics and skips unavailable shard report
   const summary = steps.find((step) =>
     step.run?.includes("scripts/ci/test-report.mjs"),
   );
-  expect(summary?.env?.CI_TEST_SELECTION).toBe(
-    "${{ needs.changes.outputs.test_selection }}",
+  // The selection travels as a file: a push whose baseline is far behind lists thousands of
+  // changed paths, which exceed the single environment-variable limit when bash starts.
+  expect(summary?.env?.CI_TEST_SELECTION).toBeUndefined();
+  expect(summary?.env?.CI_TEST_SELECTION_FILE).toBe(
+    ".cache/ci-test-selection/plan.json",
   );
+  const selectionDownload = steps.findIndex(
+    (step) => step.with?.name === "ci-test-selection-plan",
+  );
+  expect(selectionDownload).toBeGreaterThan(-1);
+  expect(selectionDownload).toBeLessThan(steps.indexOf(summary!));
   const command = steps[gate]?.run;
   if (command === undefined) throw new Error("Missing shard result gate");
   for (const tier of ["fast", "full"]) {
@@ -663,4 +671,48 @@ it("records failed omissions from full reports without treating partial or unhan
   await expect(
     readFile(join(root, ".cache/ci-test-history/test-results.json")),
   ).rejects.toMatchObject({ code: "ENOENT" });
+});
+
+it("reads a test selection too large for an environment variable from CI_TEST_SELECTION_FILE", async () => {
+  const root = await createTestTempDirectory("rea-ci-selection-file-");
+  await workflowGit(root, ["init"]);
+  const testPath = "src/sqlite/provider.test.ts";
+  await mkdir(join(root, "src/sqlite"), { recursive: true });
+  await writeFile(join(root, testPath), "// fixture\n");
+  await workflowGit(root, ["add", "src"]);
+  const changed = Array.from(
+    { length: 4000 },
+    (_, index) => `src/generated/module-${String(index)}/source-file.ts`,
+  );
+  const selection = planTestSelection(changed, "push", "fast");
+  // Linux rejects a single environment string above 128 KiB (MAX_ARG_STRLEN).
+  expect(JSON.stringify(selection).length).toBeGreaterThan(128 * 1024);
+  await mkdir(join(root, ".cache/ci-test-selection"), { recursive: true });
+  await writeFile(
+    join(root, ".cache/ci-test-selection/plan.json"),
+    JSON.stringify(selection),
+  );
+  await writeFile(
+    join(root, "test-timings.json"),
+    JSON.stringify({
+      version: 1,
+      success: true,
+      reason: "passed",
+      unhandledErrors: 0,
+      files: [{ name: testPath, durationMs: 10, state: "passed" }],
+    }),
+  );
+  await executeTimingReport(root, {
+    CI_VERIFY_TEST_INVENTORY: "true",
+    CI_TEST_SELECTION_FILE: ".cache/ci-test-selection/plan.json",
+    GITHUB_SHA: "push-sha",
+  });
+  expect(
+    JSON.parse(
+      await readFile(
+        join(root, ".cache/ci-test-selection/report.json"),
+        "utf8",
+      ),
+    ),
+  ).toMatchObject({ complete: true, executionSha: "push-sha" });
 });

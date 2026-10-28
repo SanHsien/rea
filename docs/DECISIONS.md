@@ -24,6 +24,11 @@
     - #39 `src/flutter/FlutterBuildProvider.ts:1046`：重新開啟本程式剛寫進 `mkdtemp` 目錄的 `libapp.so`，緩衝區固定為宣告大小 +1，不會超讀。上游 `main` 相同。
   - 測試碼（used in tests）：#45、#46 `src/process/capture/FilesystemSnapshot.test.ts:69/161` 是測試故意換掉檔案來驗證身分偵測；#19、#20 `src/process/ExecFileOutput.test.ts:130/218` 用 `JSON.stringify` 把測試自己的暫存路徑組進子程序腳本。
   - 重新評估的觸發條件：下次同步上游後 CodeQL 重掃仍報；任一路徑改為讀取其他使用者可寫的位置（共用目錄、未經 `mkdtemp` 的暫存路徑）；或上游修掉其中一處（那時隨同步採用）。
+- **2026-10-28 偏離上游：測試選擇（test selection）改以檔案傳給測試報告**：
+  - 現象：6.8.0 同步後每次 push 的 `CI` 都在 `Portable tests` 的「Summarize slowest test files」以 `Argument list too long` 失敗（`81fc588cc` run 40549915887、`41df03d11` run 40672948317）。`scripts/ci/baseline.mjs` 只拿「main 上最近一次成功的 push run」當基準，同步後沒有成功的 push run，基準停在同步前的 `c9f13283`（差 4739 檔）；push 的 `planTestSelection` 會附上全部變更路徑，這份 JSON 經 `CI_TEST_SELECTION` 環境變數傳入步驟，超過 Linux 單一環境變數 128 KiB 的上限。只要 push 不成功基準就不前進，所以會一直失敗。
+  - 不偏離上游的作法走不通：push 不會進 full tier（`plan.mjs` 只有 schedule、workflow_dispatch 與 PR 的 `ci:full` 標籤會），而 baseline 只認 push 事件，dispatch 或排程的全量 run 都不能當基準。
+  - 改動（最小）：`plan.mjs` 把選擇寫到 `.cache/ci-test-selection/plan.json`，`changes` job 上傳成 artifact `ci-test-selection-plan`，`Portable tests` 下載後以 `CI_TEST_SELECTION_FILE` 交給 `scripts/ci/test-report.mjs`；不再經 job output 與環境變數（`test_selection` output 已移除）。測試：`tests/boundary/filesystem/ciTestReports.test.ts` 新增 4000 個變更路徑（超過 128 KiB）從檔案讀取的案例，`ciChangeScope.test.ts` 改驗檔案。
+  - 觸發條件：下次同步上游時檢查 `ci.yml`、`scripts/ci/plan.mjs`、`scripts/ci/test-report.mjs` 的衝突；上游修掉同一缺陷（或改成不經環境變數傳遞）後，撤回本改動、採上游版。上游 `main`（`df7119aee`）仍是同樣寫法，列為觀察，不對上游開 PR 或留言。
 - **只留 `main` 分支，不提前合併上游 WIP 分支**：
   - 138 條分支（舊 release、修復分支、實驗分支與 bot 分支）名稱與 SHA 留存於 [`docs/records/removed-branches-2026-10-16.tsv`](records/removed-branches-2026-10-16.tsv)。
   - 分流評估詳見 [`docs/records/upstream-branch-evaluation-2026-10-16.md`](records/upstream-branch-evaluation-2026-10-16.md)：因上游屬超高頻迭代專案，提前合併 WIP 分支易造成未來同步嚴重衝突；採「跟隨上游主線 `main`」，未來實測遇到特定問題時再按紀錄提取對應修復。
