@@ -1190,6 +1190,53 @@ describe("Ghidra configuration paths", () => {
   });
 });
 
+describe("Ghidra Windows path semantics", () => {
+  it.each([
+    ["linux", "C:\\jdk", true],
+    ["darwin", "C:\\jdk", true],
+    ["win32", "C:\\jdk", true],
+    ["linux", "\\jdk", false],
+    ["darwin", "\\jdk", false],
+    ["win32", "\\jdk", true],
+  ] as const)(
+    "treats Windows drive letters as absolute on all hosts and rooted paths only on Windows (%s %s)",
+    async (platform, javaHome, expectedAbsolute) => {
+      const probed: string[] = [];
+      const result = await inspectGhidraInstallation(
+        {
+          resourceOwner: inspectionResources.owner,
+          environment: {},
+          installDir: platform === "win32" ? WINDOWS_INSTALL : INSTALL,
+          javaHome,
+          platform,
+          architecture: "x64",
+        },
+        host({
+          probeJava: (command) => {
+            probed.push(command);
+            return javaProbeOk<GhidraJavaObservation>(JAVA);
+          },
+        }),
+      );
+      if (expectedAbsolute) {
+        expect(result.checks).toContainEqual(
+          expect.objectContaining({ name: "configuration", status: "passed" }),
+        );
+        expect(probed.length).toBeGreaterThan(0);
+      } else {
+        expect(result.checks).toContainEqual(
+          expect.objectContaining({
+            name: "configuration",
+            status: "failed",
+            detail: "JAVA_HOME must be absolute",
+          }),
+        );
+        expect(probed).toEqual([]);
+      }
+    },
+  );
+});
+
 describe("Ghidra FAT native decompiler admission", () => {
   it.each([
     {

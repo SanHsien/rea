@@ -440,6 +440,11 @@ const availableInstallation = (
   };
 };
 
+const WINDOWS_DRIVE_LETTER_ABSOLUTE_PATTERN = /^[A-Za-z]:[\x5C\x2F]/u;
+
+const isWindowsDriveLetterAbsolute = (targetPath: string): boolean =>
+  WINDOWS_DRIVE_LETTER_ABSOLUTE_PATTERN.test(targetPath);
+
 const installationCoordinates = async (
   options: GhidraInstallationOptions,
   platform: NodeJS.Platform,
@@ -550,7 +555,7 @@ const installationCoordinates = async (
     installDir !== null &&
     (options.javaHome === undefined ||
       path.isAbsolute(options.javaHome) ||
-      win32.isAbsolute(options.javaHome))
+      isWindowsDriveLetterAbsolute(options.javaHome))
       ? await host.probeJava(
           javaCommand,
           ghidraJavaEnvironment(
@@ -701,7 +706,7 @@ const configurationCheck = (
 ): GhidraInstallationCheck => {
   const isAbsolute = (targetPath: string) =>
     (platform === "win32" ? win32 : posix).isAbsolute(targetPath) ||
-    win32.isAbsolute(targetPath);
+    isWindowsDriveLetterAbsolute(targetPath);
   const relative = [
     ...(installDir !== null && !isAbsolute(installDir)
       ? ["GHIDRA_INSTALL_DIR"]
