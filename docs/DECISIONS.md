@@ -29,6 +29,13 @@
   - 不偏離上游的作法走不通：push 不會進 full tier（`plan.mjs` 只有 schedule、workflow_dispatch 與 PR 的 `ci:full` 標籤會），而 baseline 只認 push 事件，dispatch 或排程的全量 run 都不能當基準。
   - 改動（最小）：`plan.mjs` 把選擇寫到 `.cache/ci-test-selection/plan.json`，`changes` job 上傳成 artifact `ci-test-selection-plan`，`Portable tests` 下載後以 `CI_TEST_SELECTION_FILE` 交給 `scripts/ci/test-report.mjs`；不再經 job output 與環境變數（`test_selection` output 已移除）。測試：`tests/boundary/filesystem/ciTestReports.test.ts` 新增 4000 個變更路徑（超過 128 KiB）從檔案讀取的案例，`ciChangeScope.test.ts` 改驗檔案。
   - 觸發條件：下次同步上游時檢查 `ci.yml`、`scripts/ci/plan.mjs`、`scripts/ci/test-report.mjs` 的衝突；上游修掉同一缺陷（或改成不經環境變數傳遞）後，撤回本改動、採上游版。上游 `main`（`df7119aee`）仍是同樣寫法，列為觀察，不對上游開 PR 或留言。
+- **2026-10-31 `scripts/` 底下 3 筆 critical `js/request-forgery` CodeQL 告警的判讀（上游測試／驗證治具帶進來，fork 未改這些行）**：3 筆皆為測試或驗證治具，無一筆為生產環境代碼，亦無一筆需要在 fork 先修；結論已同步寫入各告警的 dismiss 說明中。
+  - 誤報（false positive）：
+    - #7 `scripts/fixtures/page-cdp-proxy.mjs:151`：測試用 Chrome CDP loopback 代理。雖然 CodeQL 標記 `request.url` 流入 `fetch`，但程式在第 17 行已對路徑做嚴格白名單檢查（`request.url !== "/json/version" && request.url !== "/json/list"`，非兩者則立即 404 返回），實際傳入 `upstreamJson` 的 `path` 僅能為兩個常數字串之一，無法構造 SSRF 或存取非預期路徑；且服務僅監聽本機 127.0.0.1 隨機 TCP port。
+  - 測試碼（used in tests）：
+    - #8 `scripts/lib/browser-scenario-service-worker-setup-e2e.mjs:62`：Playwright E2E 測試專用的 loopback proxy，用於模擬 CDP 連線時 service worker 握手逾時與延遲等異常情境。伺服器僅監聽本機隨機 port，僅供本地測試與 Chrome/Playwright 連線，非對外公開服務。 資料流為真實但不修：`new URL(incoming.url, upstream)` 未鎖 host，`//host/path` 或 absolute-form 請求行會改打該 host（Node 26.12.1 實測）。不修的根據：前提是已能連到本機隨機 port，請求不帶標頭，只在 E2E 期間存活；由 `verify-real-browser.mjs` 經 `real-browser.yml`（`ci.yml:1001`）執行，不在 npm `files` 內。
+    - #77 `scripts/verify-package-update.mjs:68`：打包更新驗證腳本中的本機 mock npm registry 治具。僅監聽 127.0.0.1 隨機 port 供本地 npm 執行測試，目標主機硬編碼為 `https://registry.npmjs.org`，非生產環境代碼。 執行路徑：由 `verify-package.mjs`、`verify-windows-package.mjs` 呼叫，跑在 `ci.yml:720`、`ci.yml:942`；上游 `release.yml:366` 的 qualification 會呼叫 `ci.yml`，是發版前驗證的一環（fork 有 repository 守衛不發版），但不在 npm `files` 內，不隨套件交付。host 前綴實測：`@host`、`.host` 被 Node parser 回 400，absolute-form 只得到不合理的 `registry.npmjs.orghttp`。
+  - 重新評估的觸發條件：若任一檔案改為生產執行期依賴或對外公開暴露服務，或上游重構／修復該段測試治具時隨同步採用。
 - **只留 `main` 分支，不提前合併上游 WIP 分支**：
   - 138 條分支（舊 release、修復分支、實驗分支與 bot 分支）名稱與 SHA 留存於 [`docs/records/removed-branches-2026-10-16.tsv`](records/removed-branches-2026-10-16.tsv)。
   - 分流評估詳見 [`docs/records/upstream-branch-evaluation-2026-10-16.md`](records/upstream-branch-evaluation-2026-10-16.md)：因上游屬超高頻迭代專案，提前合併 WIP 分支易造成未來同步嚴重衝突；採「跟隨上游主線 `main`」，未來實測遇到特定問題時再按紀錄提取對應修復。
