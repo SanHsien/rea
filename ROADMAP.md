@@ -1,21 +1,18 @@
 # 路線圖
 
 > 本 repo 後續工作的單一真相源。做完一項，就在同一個 commit 刪掉那一列；新工作只加在這裡。
-> 現況段的數字是 2026-10-29 依 `main` `5fd7693e9974` 查的快照，開工前先重查 GitHub。
+> Code scanning 現況於 2026-11-02 依 `39d807708112` 重新查詢；其餘平台數字保留各自查詢日期，開工前先重查 GitHub。
 
 本檔只管本 fork 的維護工作；REA 產品本身的方向寫在上游持有的 [`docs/roadmap.md`](docs/roadmap.md)，本 fork 不改那一份。
 
 ## 現況
 
 `morluto/rea` 的 Windows 優先維護 fork（以 agent 做逆向工程的 CLI／MCP 工具）。2026-10-27 以 release 為單位淨樹同步到上游 `rea-agents-6.8.0`，水位 PR #7097、issue #7095（`tools/upstream_baseline.json`、[`docs/DECISIONS.md`](docs/DECISIONS.md)）；發佈鏈都加了 `github.repository == 'morluto/rea'` 守衛，fork 不發版。
-2026-10-31 查：open PR 0、Dependabot open alert 0；code scanning open 90 筆（critical 0、high 56、medium 34），`src/` 底下已在 10-28 判讀並 dismiss 為 0，`scripts/` 的 critical `js/request-forgery` 3 筆已在 10-31 判讀並 dismiss 為 0，剩下的在 `tests/`、`scripts/`（非 critical）、`.github/workflows/`、`bridge/`；CI、CodeQL、Mutation sweep、Upstream check 最近一次 success，Release 為 skipped（fork 守衛）；issues 已停用，open issue 數「未查到」（查法：`gh api "repos/SanHsien/rea/code-scanning/alerts?state=open&per_page=100" --paginate`、`gh run list -R SanHsien/rea -b main`）。
+2026-11-02 查：code scanning open 0 筆。原有 90 筆已依現行原始碼逐筆判讀並用單筆 API dismiss（測試用途 76、誤報 9、接受風險 5），每筆理由、發佈 job 守衛鏈與重新評估條件見 [`docs/DECISIONS.md`](docs/DECISIONS.md)「2026-11-02：剩餘 90 筆 CodeQL 告警逐筆判讀」。這是告警判讀結果，不是重新掃描或動態漏洞驗證。2026-10-31 的其餘快照：open PR 0、Dependabot open alert 0；CI、CodeQL、Mutation sweep、Upstream check 最近一次 success，Release 為 skipped（fork 守衛）；issues 已停用，open issue 數「未查到」。查法：`gh api "repos/SanHsien/rea/code-scanning/alerts?state=open&per_page=100" --paginate`、`gh run list -R SanHsien/rea -b main`。
 
 ## 近期：可以直接動手
 
-| 項目                                                                                                                               | 為什麼                                                                                                                                                                                      | 驗收方式                                                                                                                                                                     | 建議執行者                              | 證據                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 判讀 `release.yml` 與 `release-recovery.yml` 的 cache-poisoning／untrusted-checkout 告警                                           | 這些 high／medium 告警在發佈鏈 workflow，兩個檔同屬發佈鏈、適用同一判準；fork 已加守衛不發版，但要確認每個被標的 job 都在守衛之下，而不是假設                                               | 逐筆列出被標的 job 與它 `needs` 的根 job 是否帶 `github.repository == 'morluto/rea'`；不可達的以理由 dismiss，可達的修並在 `docs/DECISIONS.md` 記為偏離上游                  | Claude Opus                             | code scanning #2、#3、#5、#74、#75、#76（`.github/workflows/release.yml`）、#1、#4（`.github/workflows/release-recovery.yml`）；[`docs/DECISIONS.md`](docs/DECISIONS.md) 2026-10-27「Workflow」段 |
-| 分批判讀上一列以外的所有 open 告警（`tests/`、`tests/fixtures/`、`scripts/` 非 critical、`bridge/ghidra/ReaGhidraBridge.java` #6） | 測試碼那批多是測試故意製造的檔案競態或測試自己組的路徑；`bridge/` 的 #6（`java/regex-injection`，high）是產品 Java 程式，不能套「測試碼」理由，要單獨判讀；不清掉，真正的新告警會淹沒在裡面 | 同一規則同一類情境合併判讀，dismiss 理由寫具體位置與「測試碼」根據（`bridge/` 的 #6 另寫產品碼根據）；`docs/DECISIONS.md` 一條總結；完成後 open 告警只剩判讀為「要修」的項目 | Claude Sonnet（#6 由 Claude Opus 判讀） | code scanning open 清單（`tests/boundary` 為大宗）、#6（`bridge/ghidra/ReaGhidraBridge.java`）；2026-10-28 `src/` 判讀的同一判準（[`docs/DECISIONS.md`](docs/DECISIONS.md) 對應條目）             |
+目前無可直接動手的待辦。
 
 ## 中期：等條件成立再做
 
