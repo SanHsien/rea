@@ -1,5 +1,9 @@
 # 決策紀錄
 
+- **2026-11-06 依賴新鮮度重新評估**：依既有「隨上游正式版本同步」政策，對 19 筆新落後或延後失效的精確釘版更新 `.github/dependency-deferrals.json`，逐筆記錄理由與當前 `deferredLatest`；不更動釘版、lock、Node 支援下限或 workflow。新版相容性尚未驗證，registry 超過各記錄版本即重新要求評估。
+  - `npm ci --ignore-scripts` 後才執行新鮮度檢查；未安裝依賴時 `npm outdated` 會回空集合，不能作為全部最新的證據。
+  - 本次 `npm audit` 有 8 筆 moderate、0 high、0 critical（含間接依賴傳播），不是零漏洞。涉及 `glob` 的 GHSA-3g3m-2fjr-6pw4 與 `minimatch` 的 GHSA-g3hv-75wg-m249；Frida 17.25.2 仍依賴 `minimatch ^10.0.1`，更新 Frida 本身無法解決後者。安全修補與相關套件遷移另列 ROADMAP，不以新鮮度延後視為風險已消除。
+
 - **上游基準**：`morluto/rea` `main`（MIT）。
 - **2026-10-27 同步到上游 `rea-agents-6.8.0`：以 release 為單位的淨樹同步（PLAYBOOK §5 的有記錄例外）**：
   - 規模：前次水位 `988494a` 之後 1914 個 commit、約 +99 萬行，PR 1017 筆、issue 1321 筆。fork 是壓縮過的單一歷史、與上游沒有共同祖先，§5 的「逐項移植」在這個量體做不到。

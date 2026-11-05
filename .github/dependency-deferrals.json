@@ -1,11 +1,15 @@
 {
   "@babel/parser": {
-    "deferredLatest": "8.0.8",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "8.1.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；Babel 解析器與 AST 型別需配對驗證。僅延後 8.1.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "@babel/types": {
-    "deferredLatest": "8.0.8",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "8.1.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；Babel 解析器與 AST 型別需配對驗證。僅延後 8.1.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
+  },
+  "@bufbuild/protobuf": {
+    "deferredLatest": "2.17.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；protobuf 解碼與型別需回歸驗證。僅延後 2.17.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "@clack/prompts": {
     "deferredLatest": "1.8.1",
@@ -36,8 +40,8 @@
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "@types/node": {
-    "deferredLatest": "26.6.5",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "26.6.6",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；Node 型別需與上游工具鏈一併驗證，不改執行期支援範圍。僅延後 26.6.6，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "@types/semver": {
     "deferredLatest": "7.8.0",
@@ -48,8 +52,8 @@
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "@vitest/coverage-v8": {
-    "deferredLatest": "5.0.5",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "5.1.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；需與 vitest 同版升級及驗證 coverage。僅延後 5.1.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "@zip.js/zip.js": {
     "deferredLatest": "2.24.0",
@@ -60,16 +64,16 @@
     "reason": "跨 major（3→5）；序列化結果影響證據雜湊，需上游先評估。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "cborg": {
-    "deferredLatest": "6.1.5",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "6.2.1",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；CBOR 編解碼影響分析證據，待格式回歸驗證。僅延後 6.2.1，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "evmole": {
     "deferredLatest": "0.9.4",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "frida": {
-    "deferredLatest": "17.24.3",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "17.25.2",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；原生套件與注入介面需實機驗證；最新版仍依賴 minimatch ^10.0.1，無法修補 audit 所報 <11.0.1 的漏洞。僅延後 17.25.2，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "ignore": {
     "deferredLatest": "7.0.14",
@@ -80,16 +84,16 @@
     "reason": "0.7.1 產生 --schema 時沒帶 io:\"input\"，需另行處理後處理邏輯。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "isomorphic-git": {
-    "deferredLatest": "1.44.5",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "1.44.11",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；Git 證據與工作樹操作需邊界回歸驗證。僅延後 1.44.11，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "jscpd": {
     "deferredLatest": "5.4.2",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "knip": {
-    "deferredLatest": "6.43.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "6.44.1",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；可達性判讀需完整靜態檢查驗證。僅延後 6.44.1，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "lint-staged": {
     "deferredLatest": "17.6.0",
@@ -100,12 +104,20 @@
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "oxfmt": {
-    "deferredLatest": "0.75.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "0.76.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；格式器更新可能造成全樹差異，待同步統一處理。僅延後 0.76.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "oxlint": {
-    "deferredLatest": "1.90.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "1.91.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；需與 oxlint-tsgolint 一併驗證規則與型別檢查。僅延後 1.91.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
+  },
+  "oxlint-tsgolint": {
+    "deferredLatest": "7.0.2006",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；需與 oxlint 一併驗證規則與型別檢查。僅延後 7.0.2006，registry 超過此版即重新評估；本次未驗證新版相容性。"
+  },
+  "parse5": {
+    "deferredLatest": "8.1.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；HTML 解析結果影響分析證據，待格式回歸驗證。僅延後 8.1.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "playwright-core": {
     "deferredLatest": "1.64.1",
@@ -116,16 +128,24 @@
     "reason": "scripts/lib/release-proposal.mjs（由 scripts/prepare.mjs 呼叫）套用 patches/release-please+17.3.0.patch 前會檢查版本必須是 17.3.0，升級需上游一併更新 patch。本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "rolldown": {
-    "deferredLatest": "1.2.15",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "1.3.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；打包器需驗證產物及 Windows 發行包。僅延後 1.3.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
+  },
+  "semver": {
+    "deferredLatest": "7.8.6",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；版本判讀影響安裝與更新選擇，待安裝回歸驗證。僅延後 7.8.6，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "smol-toml": {
     "deferredLatest": "1.9.1",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "stream-chain": {
-    "deferredLatest": "4.3.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-28 隨 rea-agents-6.8.0 同步評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "4.4.1",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；與 stream-json 的背壓及錯誤傳遞需共同驗證。僅延後 4.4.1，registry 超過此版即重新評估；本次未驗證新版相容性。"
+  },
+  "stream-json": {
+    "deferredLatest": "3.8.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；與 stream-chain 的串流解析及資源界限需共同驗證。僅延後 3.8.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "tokenx": {
     "deferredLatest": "2.2.0",
@@ -144,16 +164,16 @@
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "vitest": {
-    "deferredLatest": "5.0.5",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "5.1.0",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；需與 @vitest/coverage-v8 同版升級及完整測試驗證。僅延後 5.1.0，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "write-file-atomic": {
     "deferredLatest": "8.0.0",
     "reason": "跨 major（7→8）；檔案寫入語意變動，需上游先評估。 本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
   "ws": {
-    "deferredLatest": "8.22.0",
-    "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
+    "deferredLatest": "8.22.1",
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；WebSocket 傳輸、取消與清理需邊界回歸驗證。僅延後 8.22.1，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "yaml": {
     "deferredLatest": "2.9.1",
