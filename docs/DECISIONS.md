@@ -1,5 +1,6 @@
 # 決策紀錄
 
+- **2026-11-08 依賴新鮮度重新評估（第二輪）**：registry 在 2026-11-05 至 11-07 又發佈 `frida` 17.26.2、`knip` 6.44.2、`oxfmt` 0.77.0、`oxlint` 1.92.0、`playwright-core` 1.65.0、`plist` 5.1.0，Dependency freshness 因此轉紅（`plist` 原本沒有 deferral 條目）。六個版本發佈都不到 7 天冷卻期（最早的 `playwright-core` 1.65.0 在 11-05 20:17 UTC），新版相容性也沒驗證，所以一律不升版，只在 `.github/dependency-deferrals.json` 更新 `deferredLatest` 並寫明日期與理由；`plist` 新增條目。冷卻期過後重新評估，不以延後視為已驗證。
 - **2026-11-08 以 npm `overrides` 修補 `minimatch`／`glob` 的 8 筆 moderate 告警**：維護者授權艦隊規劃長裁決，依下列證據決定修補而非接受風險。
   - 現況證據：修補前 `npm audit` 8 筆 moderate（GHSA-g3hv-75wg-m249：`minimatch` 7.0.0–11.0.0；GHSA-3g3m-2fjr-6pw4：`glob` 9.0.0–14.0.1），傳播到 `@electron/asar`、`frida`、`@stryker-mutator/core`、`@google-automations/git-file-utils`（release-please 鏈）。`npm audit --omit=dev` 仍有 4 筆，因為 `@electron/asar` 與 `frida` 在 `dependencies`。npm registry 上 `frida` 最新為 17.26.2，依賴仍是 `minimatch ^10.0.1`，升 Frida 無法解決；`@electron/asar` 最新 4.3.1。
   - 可達性（讀碼，不是動態驗證）：本專案只從 `@electron/asar` 取 `getRawHeader`、`uncache`（`src/artifacts/AsarArtifactReader.ts:18`），不呼叫其 `glob`／`minimatch` 打包路徑；`frida` 的 `minimatch` 只出現在 `Device.getProcess(name)`（`node_modules/frida/build/src/frida.js:433`），`src` 內沒有呼叫 `getProcess(`。所以現行用法多半碰不到漏洞程式，但依賴圖與審計報告仍會亮，故仍選擇修補。
