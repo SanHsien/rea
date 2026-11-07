@@ -73,7 +73,7 @@
   },
   "frida": {
     "deferredLatest": "17.25.2",
-    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；原生套件與注入介面需實機驗證；最新版仍依賴 minimatch ^10.0.1，無法修補 audit 所報 <11.0.1 的漏洞。僅延後 17.25.2，registry 超過此版即重新評估；本次未驗證新版相容性。"
+    "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；原生套件與注入介面需實機驗證；最新版仍依賴 minimatch ^10.0.1，故以 package.json 範圍限定的 overrides 把其 minimatch 釘到 11.0.1（首個修補版且已過 7 天冷卻期）（2026-11-08，見 docs/DECISIONS.md）。僅延後 17.25.2，registry 超過此版即重新評估；本次未驗證新版相容性。"
   },
   "ignore": {
     "deferredLatest": "7.0.14",

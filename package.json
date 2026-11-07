@@ -383,6 +383,20 @@
     "zod": "4.6.7"
   },
   "overrides": {
+    "@electron/asar": {
+      "glob": "14.0.2",
+      "minimatch": "11.0.1"
+    },
+    "@google-automations/git-file-utils": {
+      "minimatch": "11.0.1"
+    },
+    "@isaacs/nonrecursive-glob-match": "1.0.3",
+    "@stryker-mutator/core": {
+      "minimatch": "11.0.1"
+    },
+    "frida": {
+      "minimatch": "11.0.1"
+    },
     "typed-rest-client": {
       "qs": "6.16.1"
     },
