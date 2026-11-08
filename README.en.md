@@ -22,6 +22,7 @@
 > **Fork Notice**: This repository is a fork of [morluto/rea](https://github.com/morluto/rea), maintained by [SanHsien/rea](https://github.com/SanHsien/rea).
 > This branch includes comprehensive Windows 11 native hardening (NTFS hard link fallback, cross-platform path resolution, Ghidra Linux fixture host adaptation, process tree termination timeouts, etc.).
 > For the complete review and hardening report, see [docs/records/codebase-review-and-windows-hardening-2026-10-17.md](docs/records/codebase-review-and-windows-hardening-2026-10-17.md).
+> For differences from upstream, the license and how upstream is tracked, see [FORK.md](FORK.md) (written in Traditional Chinese).
 
 <div align="center">
 

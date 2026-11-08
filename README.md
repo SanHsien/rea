@@ -22,6 +22,7 @@
 > **Fork 說明**：本專案為 [morluto/rea](https://github.com/morluto/rea) 的 Fork 分支，由 [SanHsien/rea](https://github.com/SanHsien/rea) 維護。
 > 本分支重點修復了 Windows 11 原生環境下的跨平臺檔案系統權限（NTFS Hard Link fallback）、路徑解析、Ghidra Linux fixture 宿主適配、進程樹銷毀超時等關鍵問題。
 > 詳細審查與強固化技術報告請參見 [docs/records/codebase-review-and-windows-hardening-2026-10-17.md](docs/records/codebase-review-and-windows-hardening-2026-10-17.md)。
+> 與上游的差異、授權與追蹤方式見 [FORK.md](FORK.md)。
 
 <div align="center">
 
