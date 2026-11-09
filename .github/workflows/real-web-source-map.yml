@@ -49,9 +49,10 @@ jobs:
       # Own a fresh bus so Chromium never depends on an inherited session address.
       - run: dbus-run-session -- npm run verify:browser:source-maps
         env:
-          # Retain browser launch argv/PID/stderr in the verifier's captured
-          # CLI failure diagnostics without changing its deadline or retrying.
-          DEBUG: pw:browser
+          # Retain browser launch argv/PID/stderr and CDP protocol traffic in the
+          # verifier's captured CLI failure diagnostics without changing its
+          # deadline or retrying.
+          DEBUG: pw:browser,pw:protocol
           REA_BROWSER_EXECUTABLE: /usr/bin/google-chrome
           REA_BROWSER_NO_SANDBOX: "true"
           REA_WEB_SOURCE_MAP_COMPILER: ${{ runner.temp }}/rea-web-source-map-compiler/node_modules/esbuild/lib/main.js
