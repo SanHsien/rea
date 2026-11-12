@@ -572,7 +572,7 @@ candidates through smaller lineage observations, table omissions, reparenting,
 group changes, and failed cleanup retries. Identityless exit-refresh controls
 cover a replacement row that is not linked to the prior descendant set: a
 matching token on its own group is signaled, a foreign or absent token is not,
-an unreadable live token stays unresolved, a replacement that appears only in
+an unreadable live token stays unresolved, an unreadable token whose candidate leaves the table within the cleanup grace window is treated as exited while one still listed after the window stays unresolved, a replacement that appears only in
 the confirmation table is still token-checked, a group discovered during
 revalidation is signaled before cleanup succeeds, a member that changes groups
 during confirmation is signaled in its new group, a PID first seen with a

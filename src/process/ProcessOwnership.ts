@@ -1353,6 +1353,39 @@ const processRunTokenFailures = async (
 };
 
 /**
+ * PIDs from `pids` that are still live after a token read failed for them.
+ * macOS withholds KERN_PROCARGS2 (EINVAL) or returns a truncated buffer
+ * (malformed_procargs) while a process is still in its exit path, and the
+ * process table keeps listing it until it becomes a zombie or is reaped. That
+ * is not yet proof of exit, so re-list within the shared cleanup grace window.
+ * A PID still live after the window keeps its fail-closed unreadable result.
+ */
+const settledLivePids = async (
+  pids: ReadonlySet<number>,
+  host: ProcessOwnershipHost,
+  initial: readonly ProcessTableEntry[],
+): Promise<ReadonlySet<number>> => {
+  const isDarwin = (host.platform ?? process.platform) === "darwin";
+  const liveAmong = (current: readonly ProcessTableEntry[]) =>
+    new Set(
+      liveProcesses(current)
+        .map(({ pid }) => pid)
+        .filter((pid) => pids.has(pid)),
+    );
+  let processes = initial;
+  let live = liveAmong(processes);
+  const deadline = performance.now() + PROCESS_CLEANUP_VERIFICATION_GRACE_MS;
+  while (isDarwin && live.size > 0) {
+    const remaining = deadline - performance.now();
+    if (remaining <= 0) break;
+    await delay(Math.min(PROCESS_CLEANUP_VERIFICATION_INTERVAL_MS, remaining));
+    processes = await host.listProcesses();
+    live = liveAmong(processes);
+  }
+  return live;
+};
+
+/**
  * Take a fresh liveness snapshot after each ownership-read phase. Only an
  * absent PID resolves an unreadable observation; a readable token mismatch
  * remains a failure. Never reuse this snapshot across identity/token reads.
@@ -1364,25 +1397,16 @@ const recheckOwnershipFailures = async (
   if (!failures.some(({ reason }) => reason !== "run-token-mismatch"))
     return failures;
   try {
-    let processes = await host.listProcesses();
-    const isDarwin = (host.platform ?? process.platform) === "darwin";
-    for (
-      let attempt = 0;
-      isDarwin &&
-      attempt < TOKEN_READ_RETRY_ATTEMPTS &&
-      processes.some(
-        ({ pid, state }) =>
-          failures.some(
-            (failure) =>
-              failure.pid === pid && failure.reason !== "run-token-mismatch",
-          ) && state.slice(1).includes("E"),
-      );
-      attempt += 1
-    ) {
-      await delay(TOKEN_READ_RETRY_DELAY_MS);
-      processes = await host.listProcesses();
-    }
-    const live = new Set(liveProcesses(processes).map(({ pid }) => pid));
+    const pending = new Set(
+      failures
+        .filter(({ reason }) => reason !== "run-token-mismatch")
+        .map(({ pid }) => pid),
+    );
+    const live = await settledLivePids(
+      pending,
+      host,
+      await host.listProcesses(),
+    );
     return failures.filter(
       ({ pid, reason }) => reason === "run-token-mismatch" || live.has(pid),
     );
@@ -1525,8 +1549,13 @@ const scanTokenOwnedProcesses = async (
   }
   let finalLive: ReadonlySet<number> | undefined;
   try {
-    finalLive = new Set(
-      liveProcesses(await host.listProcesses()).map(({ pid }) => pid),
+    finalLive = await settledLivePids(
+      new Set([
+        ...strict.map(({ process: member }) => member.pid),
+        ...withheld.map(({ process: member }) => member.pid),
+      ]),
+      host,
+      await host.listProcesses(),
     );
   } catch (cause: unknown) {
     void cause;
