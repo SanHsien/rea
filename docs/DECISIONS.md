@@ -199,3 +199,8 @@ release-recovery.yml
 | #116 | `js/http-to-file-access`                      | `scripts/verify/clients/gemini-model-fixture.mjs:28`                       | used in tests  | Gemini loopback 模型治具把 request body/URL 作 JSON 證據寫入 directory/gemini-incoming-N.json；目的地由驗證者與計數器決定，HTTP 值只在內容，非路徑。                                                                                                                                                      |
 | #117 | `js/http-to-file-access`                      | `scripts/verify/clients/anthropic-model-fixture.mjs:30`                    | used in tests  | Anthropic loopback 模型治具把 request body/URL 作 JSON 證據寫入 directory/claude-incoming-N.json；目的地由驗證者與計數器決定，HTTP 值只在內容，非路徑。                                                                                                                                                   |
 | #118 | `js/http-to-file-access`                      | `scripts/verify/clients/model-fixture.mjs:49`                              | used in tests  | OpenAI loopback 模型治具把 request body/URL 作 JSON 證據寫入 directory/prefix-incoming-N.json；directory/prefix 由驗證者提供，HTTP 值只在內容，非路徑。                                                                                                                                                   |
+
+## 2026-11-18：CI workflow 再次 `disabled_manually`，原因仍未確認
+
+- 事實：11-14 22:33Z 之後 CI 沒有 run；11-18 查到 `disabled_manually`，已 `gh workflow enable` 恢復 `active`。
+- 已排除本機呼叫端（腳本、hook、fleet_ops、排程）與 GitHub 非活動停用（那會是 `disabled_inactivity`）。無法取得 disable 事件，沒有證據指認行為者，所以不加推測性防線；ROADMAP 該列保留並記載排除項。
