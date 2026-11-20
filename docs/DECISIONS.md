@@ -204,3 +204,11 @@ release-recovery.yml
 
 - 事實：11-14 22:33Z 之後 CI 沒有 run；11-18 查到 `disabled_manually`，已 `gh workflow enable` 恢復 `active`。
 - 已排除本機呼叫端（腳本、hook、fleet_ops、排程）與 GitHub 非活動停用（那會是 `disabled_inactivity`）。無法取得 disable 事件，沒有證據指認行為者，所以不加推測性防線；ROADMAP 該列保留並記載排除項。
+
+## 2026-11-20：`CI` 拿掉每小時排程，只留每天全量（驗證性緩解）
+
+- 事實：帳號 security log（`repo:SanHsien/rea created:2026-11-14..2026-11-20`）只有 2 筆 `workflows.enable_workflow`，沒有 `disable_workflow`，這段期間也沒有 `actions_policy_violation`。11-18 那次是 15:51Z 重新啟用後 23 分鐘、push run `44343113939` 執行中被停用。同 repo 每小時只跑一個 Ubuntu job 的 `CI timings` 從未停用；`CI` 每天 24 次排程，缺有效全量 artifact 時會展開 37～42 個含 macOS／Windows 的 job。
+- 假設（未證實）：GitHub 平台端對公開 fork 的重型高頻排程做了處置。
+- 做法：`ci.yml` 拿掉 `23 0-2,4-23 * * *`，只留 `23 3 * * *`（`CI_FORCE_FULL` 本來就只在這條為真，所以每天仍有一次強制全量）；`ciRequiredLanes.test.ts` 的排程斷言同步改。push、PR、`workflow_dispatch` 不變。
+- 不選的做法：排程時跳過重型矩陣（要改 qualification／plan，深度偏離上游）；外部監看自動重新啟用（對假設沒有驗證力，且可能被視為對抗平台處置）。
+- 驗收與還原：之後兩週 `CI` 都是 `active` 就視為假設成立、保留此分岔；兩週內又被停用就表示與頻率無關，還原成上游的兩條排程，改查其他方向。GitHub Support 工單由維護者決定是否送出（草稿在艦隊共用筆記）。
