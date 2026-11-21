@@ -219,3 +219,19 @@ release-recovery.yml
 - 結論：之前的 `disabled_manually` 和這次的整個 fork 停用，都和 GitHub 對 fork 浪費算力的處置一致；11-20 只拿掉 `CI` 的每小時排程不夠，因為還有 `CI timings` 每小時排程與其他 30 支 workflow。
 - API 看不出這種停用，所以 `CI` `active` 不能當健康訊號；觀察腳本改看最近一次 run 的時間。
 - 下一步：依艦隊維運長的用量分析（共用筆記 `actions-usage-1121.md`）削減 fork 上不需要的排程後，再到 Actions 頁重新啟用。原因已知，GitHub Support 工單不再必要。
+
+## 2026-11-21：`CI` 全量排程改成每週一次；`Mutation sweep`、`CI timings` 在 API 層停用
+
+- 背景：見上一條。用量分析（艦隊共用筆記 `actions-usage-1121.md` §3）量到 10-31～11-20 每週約 6199 加權分鐘（Linux ×1、Windows ×2、macOS ×10），其中 `CI` 約 5618，大宗是含 macOS 的每日 41 job 全量；11-20 改成每天一次之後估計仍有約 4200。
+- API 層停用（2026-11-21，不改檔案）：`gh workflow disable "Mutation sweep" -R SanHsien/rea`（`mutation.yml`，上游每天 04:47 的 mutation，約 388／週）與 `gh workflow disable "CI timings" -R SanHsien/rea`（`ci-timings.yml`，上游每小時 `17 * * * *`，每週約 168 個 run）。兩支都是 banner 點名的「繼承自上游、fork 用不到的排程」。YAML 沒動，所以 `mutationWorkflow.test.ts`、`ciRequiredLanes.test.ts` 斷言的內容不受影響；從檔案看不出這個狀態，所以記在這裡與 `FORK.md`。還原：`gh workflow enable "Mutation sweep" -R SanHsien/rea`、`gh workflow enable "CI timings" -R SanHsien/rea`。
+- 改動：`ci.yml` 的排程從每天 `23 3 * * *` 改成每週一 `23 3 * * 1`，`CI_FORCE_FULL` 比對的字串同步改，所以這條排程仍是強制全量。
+- 改之前先確認的風險：「排程全量太少，push 會不會因為沒有新鮮的全量 artifact 而每次擴成全量」。讀碼結論是不會：
+  - 讀 `ci-full-qualification-v1` artifact 的只有 `Admit scheduled full qualification` 這一步，條件是 `github.event_name == 'schedule'`（`ci.yml:111`）；push 不跑它，`CI_SKIP_FULL` 為 false。
+  - push 的 tier 只由 `plan.mjs:157-168` 決定：只有 schedule、`workflow_dispatch` 或 `CI_FULL`（`source_sha` 或 PR 的 `ci:full` 標籤，`ci.yml:126`）會是 `full`，push 一律 `fast`。
+  - push 的比較基準來自 `baseline.mjs:35-66`：最近 100 個成功的 push run 中，第一個是 HEAD 祖先的 `head_sha`；與排程、artifact 都無關。
+  - 找不到基準時走 `plan.mjs:193-197` 的 `full()`，但在 fast tier 這個函式只設 `code`、`runtime`（`plan.mjs:49-57`）；`package` 為 false，矩陣只有 `ubuntu-latest`（`plan.mjs:310-323`），沒有 macOS／ARM。本機以 `GITHUB_EVENT_NAME=push`、空 `BASE_SHA` 跑 `plan.mjs` 實測為 `tier fast`、只選 `code,runtime`、矩陣 `["ubuntu-latest"]`。
+  - DECISIONS 11-20 寫的「缺有效全量 artifact 時會展開 37～42 個 job」說的是上游每小時那條**排程**（`CI_FORCE_FULL` 為 false 時才查 artifact，`qualification.mjs:61-159`），不是 push。現在唯一的排程是強制全量，artifact 查詢實際上不會被用到。
+  - 新增測試釘住這件事：`ciRequiredLanes.test.ts`「forces full qualification on the only schedule and never consults the receipt on push」（`CI_FORCE_FULL` 必須比對唯一那條 cron；artifact 查詢只在 schedule、baseline 只在 push）；`ciChangeScope.test.ts`「keeps a push without any baseline on the Linux-only fast tier」。
+- 預估：`CI` 每週一次全量約 410，加 push CI 約 750，加 CodeQL 約 135 與其他約 30，合計約 **1300／週**（原本約 6199，-79%）。push 的量取決於推送次數，這是估計，不是量測。
+- 不選的做法：整段拿掉排程（約 900／週，但完全沒有定期全量，要靠手動 `gh workflow run CI`）；排程時跳過重型矩陣（要改 qualification／plan，深度偏離上游）。
+- 驗收與還原：Actions 重新啟用後到 2026-12-04，至少每 8 天有一個新 run（`gh run list -R SanHsien/rea -L 1`；每週排程加 1 天容許 GitHub 排程延遲）。又被 GitHub 停用就再往下削（例如整段拿掉排程）。要回到上游行為：`ci.yml` 改回兩條排程與 `'23 3 * * *'`，刪掉兩個 fork 測試案例並把斷言改回。

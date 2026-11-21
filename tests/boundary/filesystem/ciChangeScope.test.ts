@@ -549,6 +549,22 @@ it("fails closed when the successful push baseline is not an ancestor", async ()
   expect(head).not.toBe(base);
 });
 
+it("keeps a push without any baseline on the Linux-only fast tier", async () => {
+  // The weekly forced full schedule is safe only while push selection does not
+  // fall back to the full matrix when no recent baseline or receipt exists.
+  const { directory } = await fixture();
+  const head = await change(directory, ["src/windows/Example.ts"]);
+  const plan = await classify(directory, "", head, "push");
+  expect(plan).toMatchObject({
+    tier: "fast",
+    code: true,
+    runtime: true,
+    package: false,
+    apple: false,
+    matrix: { include: [{ os: "ubuntu-latest" }] },
+  });
+});
+
 it("fails classification rather than treating an invalid Git comparison as a scope", async () => {
   const { directory, base } = await fixture();
   await expect(classify(directory, "missing-ref", base)).rejects.toMatchObject({

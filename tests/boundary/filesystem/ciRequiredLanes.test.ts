@@ -502,7 +502,9 @@ it("keeps fast feedback separate from complete qualification and release proof",
         ),
       ),
     );
-  expect(ci.on.schedule).toEqual([{ cron: "23 3 * * *" }]);
+  // Fork divergence (FORK.md): one weekly forced full run, not upstream's
+  // hourly plus daily schedules.
+  expect(ci.on.schedule).toEqual([{ cron: "23 3 * * 1" }]);
   expect(ci.concurrency.group).toContain("'qualification' || 'feedback'");
   expect(ci.concurrency.group).toContain("inputs.source_sha ||");
   expect(ci.concurrency.group).toContain("github.ref");
@@ -525,6 +527,50 @@ it("keeps fast feedback separate from complete qualification and release proof",
   expect(proof?.if).toContain("needs.changes.outputs.tier == 'full'");
   expect(proof?.if).toContain("matrix.platform == 'linux'");
   expect(proof?.if).toContain("matrix.architecture == 'x64'");
+});
+
+it("forces full qualification on the only schedule and never consults the receipt on push", async () => {
+  const ci = z
+    .object({
+      on: z.object({
+        schedule: z.array(z.object({ cron: z.string() })).length(1),
+      }),
+      jobs: z.object({
+        changes: z.object({
+          steps: z.array(
+            z.object({
+              id: z.string().optional(),
+              if: z.string().optional(),
+              env: z.record(z.string(), z.string()).optional(),
+            }),
+          ),
+        }),
+      }),
+    })
+    .parse(
+      parse(
+        await readFile(
+          new URL("../../../.github/workflows/ci.yml", import.meta.url),
+          "utf8",
+        ),
+      ),
+    );
+  const [{ cron }] = ci.on.schedule as [{ cron: string }];
+  const steps = ci.jobs.changes.steps;
+  const qualification = steps.find((step) => step.id === "qualification");
+  // A cron string edit that misses this comparison would silently turn the
+  // scheduled run into a receipt lookup instead of a forced full run.
+  expect(qualification?.env?.CI_FORCE_FULL).toBe(
+    `\${{ github.event.schedule == '${cron}' }}`,
+  );
+  // Push selection must not depend on a fresh full-qualification artifact:
+  // only scheduled runs look it up; push runs use the successful push baseline.
+  expect(qualification?.if).toBe(
+    "github.event_name == 'schedule' && inputs.source_sha == ''",
+  );
+  expect(steps.find((step) => step.id === "baseline")?.if).toBe(
+    "github.event_name == 'push' && inputs.source_sha == ''",
+  );
 });
 
 it.each([
