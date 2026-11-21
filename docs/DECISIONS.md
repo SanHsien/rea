@@ -212,3 +212,10 @@ release-recovery.yml
 - 做法：`ci.yml` 拿掉 `23 0-2,4-23 * * *`，只留 `23 3 * * *`（`CI_FORCE_FULL` 本來就只在這條為真，所以每天仍有一次強制全量）；`ciRequiredLanes.test.ts` 的排程斷言同步改。push、PR、`workflow_dispatch` 不變。
 - 不選的做法：排程時跳過重型矩陣（要改 qualification／plan，深度偏離上游）；外部監看自動重新啟用（對假設沒有驗證力，且可能被視為對抗平台處置）。
 - 驗收與還原：之後兩週 `CI` 都是 `active` 就視為假設成立、保留此分岔；兩週內又被停用就表示與頻率無關，還原成上游的兩條排程，改查其他方向。GitHub Support 工單由維護者決定是否送出（草稿在艦隊共用筆記）。
+
+## 2026-11-21：停用的真正來源是 GitHub 的 fork 用量處置
+
+- 事實：11-21 在已登入的瀏覽器看 `https://github.com/SanHsien/rea/actions`，整頁是「Workflows on this fork have been disabled. GitHub disabled workflows on this forked repository to reduce the amount of compute that is wasted. Workflows inherited from the upstream repository often run on schedules or events that aren’t needed on a fork.」同時 API 仍回 `actions/permissions` `enabled:true`、`CI` `active`。最後一次 run 是 11-20 20:20Z（`CI timings` 排程），之後所有排程都沒跑，包括 11-21 03:23Z 的每日全量。艦隊另兩個 fork（SkillSpector、agent-governance-toolkit）也看到同類 banner。
+- 結論：之前的 `disabled_manually` 和這次的整個 fork 停用，都和 GitHub 對 fork 浪費算力的處置一致；11-20 只拿掉 `CI` 的每小時排程不夠，因為還有 `CI timings` 每小時排程與其他 30 支 workflow。
+- API 看不出這種停用，所以 `CI` `active` 不能當健康訊號；觀察腳本改看最近一次 run 的時間。
+- 下一步：依艦隊維運長的用量分析（共用筆記 `actions-usage-1121.md`）削減 fork 上不需要的排程後，再到 Actions 頁重新啟用。原因已知，GitHub Support 工單不再必要。
