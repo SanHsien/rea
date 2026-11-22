@@ -248,3 +248,11 @@ release-recovery.yml
 - workflow（`dependency-freshness.yml`）：呼叫加上 `--strict --github-output`；新增一步在 `check_failed == 'true'` 時以自己的名稱失敗；原本的閘門改成「步驟沒成功，或 `needs_attention` 不是 `false`」就失敗，所以連輸出都沒寫出來的當機也算失敗。路徑過濾加上測試檔。
 - 測試（`tools/test_check_dependency_freshness.py` 的 `LookupFailureTests`）：E429 payload、只有 stderr 的非 0 結束、缺 `latest` 的列，三種都必須出現 `CHECK FAILED`、結束碼非 0、`check_failed=true`；叫 `error` 的套件仍是一般列；乾淨查詢仍回 0 且 `needs_attention=false`。
 - 沒做的事：不在這裡重試或退避 E429（失敗就是失敗，重跑由人或排程決定）；不改其他 repo，艦隊統一版檢查器由維運長另案處理。
+
+## 2026-11-22：30 個落後釘版重新延後到 2026-12-07（不手動升級）
+
+- 事實：修掉 fail-open 之後，Dependency freshness run 44974776819 正確失敗：30 個直接依賴的釘版落後於 registry，超過各自的 `deferredLatest`（例如 `@babel/parser` 8.0.4 對 8.1.3、`cborg` 6.1.3 對 7.0.0、`lint-staged` 16.4.0 對 17.6.1）。它們從 2026-11-07 起就被舊檢查器藏起來。
+- 決定：不為了讓檢查變綠而手動升 30 個釘版。上游 `morluto/rea` 在 `rea-agents-6.10.1` 的釘版已查對（`gh api repos/morluto/rea/contents/package.json?ref=rea-agents-6.10.1`，另掃 4 個 workspace 的 package.json）：28 個與本 fork 完全相同（upstream unchanged），2 個已動（moved upstream）：`playwright-core` 上游改釘 1.64.1、`incur` 上游已移除。所以升級走 ROADMAP「同步上游 6.9.0–6.10.1」那一列，排在 CI 觀察期（2026-12-04）之後，不在這裡手動分岔。
+- 做法：`.github/dependency-deferrals.json` 把這 30 項的 `deferredLatest` 改成目前 registry 最新版；`reason` 註明「moved upstream in 6.10.1 → taken with the upstream sync」或「upstream unchanged」，並寫 reviewed 2026-11-22、revisit 2026-12-07。檔案結構只有 `deferredLatest` 與 `reason` 兩欄，檢查器不認其他欄位，所以日期寫在 `reason` 內。
+- 安全：`npm audit --json` 為 0 筆（info／low／moderate／high／critical 全 0），這 30 項沒有開啟中的公告。
+- 重新評估條件：2026-12-07 到期，或 registry 又超過各自的 `deferredLatest`。到期時先看上游同步是否已完成；完成就刪掉已同步項目的延後條目。
