@@ -7,6 +7,7 @@ on:
       - package.json
       - package-lock.json
       - tools/check_dependency_freshness.py
+      - tools/test_check_dependency_freshness.py
       - .github/dependency-deferrals.json
       - .github/workflows/dependency-freshness.yml
   schedule:
@@ -53,14 +54,28 @@ jobs:
       - name: Compare pins with the registry
         id: freshness
         continue-on-error: true
-        run: python tools/check_dependency_freshness.py --output dependency-freshness-report.md
+        run: >-
+          python tools/check_dependency_freshness.py
+          --strict
+          --github-output
+          --output dependency-freshness-report.md
 
       - name: Publish report
         if: always()
         run: cat dependency-freshness-report.md >> "$GITHUB_STEP_SUMMARY" || true
 
-      - name: Require evaluation when a pin is stale
-        if: always() && steps.freshness.outcome == 'failure'
+      # A lookup that failed is unchecked, not current: it fails the job under its own name.
+      - name: Fail when the registry lookup itself failed
+        if: always() && steps.freshness.outputs.check_failed == 'true'
         run: |
-          echo "::error::A direct dependency pin is behind the registry without a current deferral. See the workflow summary."
+          echo "::error::The registry lookup failed (CHECK FAILED), so the pins were not compared. This is not a pass. See the workflow summary and re-run."
+          exit 1
+
+      - name: Require evaluation when a pin is stale
+        if: >-
+          always() &&
+          (steps.freshness.outcome != 'success' ||
+          steps.freshness.outputs.needs_attention != 'false')
+        run: |
+          echo "::error::A direct dependency pin is behind the registry without a current deferral, or the check did not complete. See the workflow summary."
           exit 1

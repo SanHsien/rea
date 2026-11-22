@@ -235,3 +235,16 @@ release-recovery.yml
 - 預估：`CI` 每週一次全量約 410，加 push CI 約 750，加 CodeQL 約 135 與其他約 30，合計約 **1300／週**（原本約 6199，-79%）。push 的量取決於推送次數，這是估計，不是量測。
 - 不選的做法：整段拿掉排程（約 900／週，但完全沒有定期全量，要靠手動 `gh workflow run CI`）；排程時跳過重型矩陣（要改 qualification／plan，深度偏離上游）。
 - 驗收與還原：Actions 重新啟用後到 2026-12-04，至少每 8 天有一個新 run（`gh run list -R SanHsien/rea -L 1`；每週排程加 1 天容許 GitHub 排程延遲）。又被 GitHub 停用就再往下削（例如整段拿掉排程）。要回到上游行為：`ci.yml` 改回兩條排程與 `'23 3 * * *'`，刪掉兩個 fork 測試案例並把斷言改回。
+
+## 2026-11-22：依賴新鮮度檢查把「查不到」報成「都是最新」（fail-open，已修）
+
+- 事實：npm registry 回 E429 時，`npm outdated --json` 的結束碼是 1，stdout 是 `{"error": {"code": "E429", ...}}`。結束碼 1 同時也是「有套件落後」的正常結果，所以 `run_outdated` 照收；`classify` 把 `error` 當成一個套件名稱，取不到 `wanted`／`latest` 就跳過；`render` 看到零列就印「all direct pins are current」，`main` 回 0，workflow 綠燈。艦隊維運長以模擬限流重現（艦隊共用筆記 `freshness-checker-scope-1122.md`）。
+- 修法（`tools/check_dependency_freshness.py`）：
+  - `run_outdated` 檢查 payload：頂層 `error` 不帶版本欄位就是 npm 的失敗，丟 `FreshnessError`（真的叫 `error` 的套件有 `current`／`wanted`／`latest`，照常當一列）；結束碼非 0 卻沒有 stdout 也算失敗。
+  - `classify` 遇到沒有可比較版本的列，標成 `CHECK FAILED`，不再當成「沒落後」跳過。
+  - 查詢失敗時仍然寫出報告，內容是 `CHECK FAILED` 與 npm 的錯誤文字，不再出現「all direct pins are current」。
+  - 結束碼：0 全部查過且最新或已延後；1 有釘版待評估；2 檢查不完整。新增 `--github-output`（寫 `needs_attention`、`check_failed`）與 `--strict`。
+- `--strict` 在這裡不改變行為：這支檢查器本來就是有落後就回 1，把預設放寬成回 0 等於削弱現有閘門。收下這個旗標只是讓呼叫方式與艦隊其他 repo 一致。
+- workflow（`dependency-freshness.yml`）：呼叫加上 `--strict --github-output`；新增一步在 `check_failed == 'true'` 時以自己的名稱失敗；原本的閘門改成「步驟沒成功，或 `needs_attention` 不是 `false`」就失敗，所以連輸出都沒寫出來的當機也算失敗。路徑過濾加上測試檔。
+- 測試（`tools/test_check_dependency_freshness.py` 的 `LookupFailureTests`）：E429 payload、只有 stderr 的非 0 結束、缺 `latest` 的列，三種都必須出現 `CHECK FAILED`、結束碼非 0、`check_failed=true`；叫 `error` 的套件仍是一般列；乾淨查詢仍回 0 且 `needs_attention=false`。
+- 沒做的事：不在這裡重試或退避 E429（失敗就是失敗，重跑由人或排程決定）；不改其他 repo，艦隊統一版檢查器由維運長另案處理。
