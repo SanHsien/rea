@@ -278,3 +278,13 @@ release-recovery.yml
 - 現象：同步 6.10.1 後 `CI` 的 Documentation job（run 45330529235）在「Verify published routes, source links and local anchors」失敗：`ENOENT … docs/.vitepress/dist/records/removed-branches-2026-10-16.tsv`。同步前（`f61ce6301`）這個 job 是綠的；純上游 `rea-agents-6.10.1` 的 CI push run 44681430184 Documentation 為 success。
 - 根因：上游 6.10.x 新增 `scripts/verify-documentation-routes.mjs`，掃描網站產生的每一頁的本地連結並確認目標存在。fork 的 `docs/DECISIONS.md` 與 `docs/records/*.md` 在 `docs/` 底下，被 VitePress 當成頁面渲染，裡面連到 `.tsv` 證據檔；VitePress 不發佈這類非 Markdown 檔，所以連結在產物裡是壞的。
 - 決定：`docs/.vitepress/config.ts` 的 `srcExclude` 加上 `DECISIONS.md`、`records/**`。這些是 fork 的維護紀錄，在 GitHub 上閱讀即可，不屬於產品網站；不改上游的驗證腳本，也不改紀錄裡的連結。本機 `npm run verify:docs:routes` 由失敗轉為 `ok`（67 個公開路由、472 頁）。
+
+## 2026-11-24：移除 `frida` 的 `minimatch` override，記錄 GHSA-g3hv-75wg-m249 例外
+
+- 現象：同步 6.10.1 後 `CI` 的 Native package baseline（四個平台，run 45330529235、45334765291）在 `verify:package` 失敗：`Cannot omit a runtime or unresolved override: @isaacs/nonrecursive-glob-match`。純上游 `rea-agents-6.10.1` 的 CI push run 44681430184 這四個 job 都是 success。
+- 根因：上游 6.10.x 新增 `scripts/lib/plugin-package.mjs`，打包時拿掉 `overrides`（Claude 遇到帶 override 的 manifest 會跳過安裝依賴），所以拒絕任何作用在 runtime 依賴上的 override，避免發佈的套件靜默失去它。fork 2026-11-08 加的 `frida.minimatch` 11.0.1 作用在 optional runtime 依賴 `frida` 上；它的 `minimatch` 11.0.1 又讓頂層 `@isaacs/nonrecursive-glob-match` 釘版變成 runtime（devOptional）。逐一檢查七個 override，只有這兩個不過。
+- 決定（派工方 2026-11-24 核准，依 2026-11-08 條目「上游同步時要保留或重新判斷」重新判斷）：只移除 `frida.minimatch` override。`frida` 17.27.5 仍依賴 `minimatch ^10.0.1`，鎖檔改解析到 `minimatch` 10.2.6（optional runtime），仍在 GHSA-g3hv-75wg-m249（`>= 7.0.0, < 11.0.1`）範圍內；上游 6.10.1 帶的是同一情況（10.2.5）。`@isaacs/nonrecursive-glob-match` 1.0.3 變回純開發依賴，釘版保留。
+- 風險判讀：`frida` 只在 `Device.getProcess(name)`（`node_modules/frida/build/src/frida.js:433`）用到 `minimatch`，`src/` 沒有任何 `getProcess(` 呼叫（2026-11-24 重查），漏洞程式在本 fork 的用法中走不到。`npm audit` 因此為 2 筆 moderate（`minimatch` 與其依賴者 `frida`），不是 0。
+- 機器層：`tests/conformance/dependencyAdvisories.test.ts` 新增一條例外（`acceptedExceptions`），只放行 `node_modules/minimatch` 這一份，且要求它的依賴者只有 `node_modules/frida`；例外不再需要（版本離開告警範圍或該份消失）時測試會轉紅，提醒刪除。用舊鎖檔與「多一個依賴者」兩種變形實測都會紅。
+- 連帶更新：`licenses/npm-dependencies.txt` 重產；`licenses/npm-runtime-notices.txt` 移除 `minimatch@11.0.1` 與 `@isaacs/nonrecursive-glob-match@1.0.3` 兩段 runtime 條目，換入 `minimatch@10.2.6`（archive 與鎖檔 integrity 相符，`LICENSE.md` 與上游 10.2.5 條目逐位元組相同），更新指紋；`licenses:check` 通過。
+- 重新評估條件：`frida` 改依賴 `minimatch >=11.0.1` 時移除例外（ROADMAP 中期表）。
