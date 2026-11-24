@@ -80,7 +80,10 @@ export default defineConfig({
       });
     },
   },
-  srcExclude: ["readme/**"],
+  // Fork: SanHsien/rea keeps its maintenance decisions and records under docs/
+  // (FORK.md). They are not product documentation, link raw .tsv evidence the
+  // site does not publish, and stay out of the rendered site.
+  srcExclude: ["readme/**", "DECISIONS.md", "records/**"],
   themeConfig: {
     nav: [
       { text: "Get started", link: "/installation" },

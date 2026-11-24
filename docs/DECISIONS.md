@@ -272,3 +272,9 @@ release-recovery.yml
   - `tests/boundary/filesystem/ciCodeqlScope.test.ts`：驗的是上游 `CodeQL production` workflow 的形狀，fork 保留自己的 `codeql.yml`，模組載入就失敗。改驗 fork workflow 的觸發與語言矩陣；`scripts/ci/codeql-scope.mjs` 與 `.github/codeql/production.yml` 的上游斷言保留。
   - `tests/boundary/filesystem/documentationFacts.test.ts`：fork 用來取代 Discord 徽章的連結突變還指向舊路徑 `../installation.md#hopper`，改成上游搬移後的 `../getting-started/installation.md#hopper`。
 - **Node 26 列結案**：6.10.1 的 `scripts/lib/verifier-source-loader.mjs` 先以 transform 模式探測，Node 26 上明確拒絕並提示改用 `.nvmrc` 的版本（2026-11-24 以 Node 26.12.1 實跑 `importVerifierSource` 得到該訊息），符合 ROADMAP 該列「上游明確擋下 Node 26」的觸發條件。`engines` 的 `>=26.12.1` 指已安裝套件的執行環境，source script 一律用 `.nvmrc`；ROADMAP 刪除該列。
+
+## 2026-11-24：VitePress 網站排除 fork 的維護紀錄
+
+- 現象：同步 6.10.1 後 `CI` 的 Documentation job（run 45330529235）在「Verify published routes, source links and local anchors」失敗：`ENOENT … docs/.vitepress/dist/records/removed-branches-2026-10-16.tsv`。同步前（`f61ce6301`）這個 job 是綠的；純上游 `rea-agents-6.10.1` 的 CI push run 44681430184 Documentation 為 success。
+- 根因：上游 6.10.x 新增 `scripts/verify-documentation-routes.mjs`，掃描網站產生的每一頁的本地連結並確認目標存在。fork 的 `docs/DECISIONS.md` 與 `docs/records/*.md` 在 `docs/` 底下，被 VitePress 當成頁面渲染，裡面連到 `.tsv` 證據檔；VitePress 不發佈這類非 Markdown 檔，所以連結在產物裡是壞的。
+- 決定：`docs/.vitepress/config.ts` 的 `srcExclude` 加上 `DECISIONS.md`、`records/**`。這些是 fork 的維護紀錄，在 GitHub 上閱讀即可，不屬於產品網站；不改上游的驗證腳本，也不改紀錄裡的連結。本機 `npm run verify:docs:routes` 由失敗轉為 `ok`（67 個公開路由、472 頁）。
