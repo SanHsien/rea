@@ -40,7 +40,7 @@
     <!-- prettier-ignore -->
     <meta
       property="og:image:alt"
-      content="REA — Find out how software works. Reverse engineering with your coding agent."
+      content="REA: Find out how software works. Reverse engineering with your coding agent."
     />
     <!-- prettier-ignore -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -53,7 +53,7 @@
     <!-- prettier-ignore -->
     <meta
       name="twitter:image:alt"
-      content="REA — Find out how software works. Reverse engineering with your coding agent."
+      content="REA: Find out how software works. Reverse engineering with your coding agent."
     />
     <!-- website:sharing:end -->
     <!-- website:theme:start -->
@@ -81,8 +81,6 @@
           <a href="../../showcase/" aria-current="page">Showcases</a>
           <a href="../../blog/">Blog</a>
           <a href="../../guides/">Guides</a>
-          <a href="../../faq/">FAQ</a>
-          <a href="../../contributors/">Contributors</a>
         </nav>
         <div class="header-social">
           <details class="language-picker" data-i18n-skip><summary><span aria-hidden="true">文 / A</span> <span>English</span></summary><nav aria-label="English"><a href="../../showcase/aegis/" lang="en" dir="ltr" data-language="en" aria-current="true">English</a><a href="../../zh-TW/showcase/aegis/" lang="zh-TW" dir="ltr" data-language="zh-TW">繁體中文</a></nav></details>
@@ -672,9 +670,16 @@ code = pad_with_zeroes(code, 6)</span></code></pre>
           <section class="article-section" id="try">
             <h2>Inspect the APK yourself</h2>
             <p>
-              <a href="../../get-started/">Set up REA</a> on macOS or Linux,
-              then download these two files into the same folder. On Windows,
-              use a Linux environment such as WSL.
+              <a href="../../get-started/">Set up REA</a>, then download these
+              two files into the same folder. On Windows x64, use a package with
+              matching Windows native controls and owned protocol stdin support;
+              see the
+              <a
+                href="https://github.com/morluto/rea/blob/main/docs/guides/android/android-analysis.md"
+                >Android provider guide</a
+              >
+              for prerequisites and PowerShell setup. A Linux environment such
+              as WSL is another option.
             </p>
             <p>
               Android analysis needs a full JDK 17 or later. Select it with
@@ -764,7 +769,8 @@ npx rea-agents@latest inspect-android-package \
       <div class="container footer-inner">
         <p>REA · Reverse Engineer Anything</p>
         <div class="footer-links">
-          <a href="../../contributors/">Contributors</a
+          <a href="../../faq/">FAQ</a
+          ><a href="../../contributors/">Contributors</a
           ><a href="https://github.com/morluto/rea">Source</a
           ><a href="https://github.com/morluto/rea/blob/main/LICENSE">MIT license</a
           ><a href="https://discord.gg/GkcryMnJDM">Join the community</a

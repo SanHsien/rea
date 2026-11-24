@@ -4,10 +4,10 @@
   "track": "release",
   "release_tag_prefix": "rea-agents-",
   "ticket_cutoff": "release",
-  "reviewed_release": "rea-agents-6.8.0",
-  "reviewed_through": "160d821ac9a0310afcb8d1fc427862dd6508add5",
-  "reviewed_date": "2026-10-27",
-  "reviewed_pr_through": 7097,
-  "reviewed_issue_through": 7095,
-  "decision_log": "docs/records/upstream-sync-evaluation-2026-10-27.md"
+  "reviewed_release": "rea-agents-6.10.1",
+  "reviewed_through": "8bb01b514ac766c0c3ecc8f362bd38186eaec9c2",
+  "reviewed_date": "2026-11-23",
+  "reviewed_pr_through": 12737,
+  "reviewed_issue_through": 12920,
+  "decision_log": "docs/records/upstream-sync-evaluation-2026-11-23.md"
 }

@@ -39,6 +39,10 @@
     "deferredLatest": "10.1.1",
     "reason": "本 fork 的精確釘版跟隨上游 morluto/rea，不自行偏離，升級隨上游同步一併進來（2026-10-25 評估；npm audit 為 0，Dependabot 安全更新仍開啟）。"
   },
+  "@toon-format/toon": {
+    "deferredLatest": "4.4.0",
+    "reason": "2026-11-23 同步 rea-agents-6.10.1 後新落後（reviewed 2026-11-23，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 2.3.1，registry 最新 4.4.0（跨兩個 major，輸出格式相容性待上游評估）；釘版跟隨上游，不自行升級；npm audit 為 0。"
+  },
   "@types/node": {
     "deferredLatest": "26.6.6",
     "reason": "2026-11-06 評估：依 fork 隨上游正式版本同步的既有政策保留精確釘版；Node 型別需與上游工具鏈一併驗證，不改執行期支援範圍。僅延後 26.6.6，registry 超過此版即重新評估；本次未驗證新版相容性。"
@@ -79,10 +83,6 @@
     "deferredLatest": "7.0.16",
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 7.0.6）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
   },
-  "incur": {
-    "deferredLatest": "0.9.0",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：moved upstream in 6.10.1 → taken with the upstream sync：上游 rea-agents-6.10.1 已移除此依賴，隨上游同步（ROADMAP「同步上游 6.9.0–6.10.1」）一併消失；npm audit 為 0。"
-  },
   "isomorphic-git": {
     "deferredLatest": "1.44.18",
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 1.38.7）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
@@ -92,12 +92,12 @@
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 5.0.12）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
   },
   "knip": {
-    "deferredLatest": "6.47.0",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 6.39.0）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "6.48.0",
+    "reason": "2026-11-23 同步 rea-agents-6.10.1 後新落後（reviewed 2026-11-23，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 6.39.0，registry 最新 6.48.0（開發用工具，未驗證新版對 knip.json 規則的影響）；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "lint-staged": {
-    "deferredLatest": "17.6.1",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 16.4.0）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "17.6.2",
+    "reason": "2026-11-23 同步 rea-agents-6.10.1 後新落後（reviewed 2026-11-23，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 16.4.0，registry 最新 17.6.2（major 升級，開發用工具，pre-commit 行為未驗證）；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "lossless-json": {
     "deferredLatest": "4.3.4",
@@ -108,12 +108,12 @@
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 6.3.2）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
   },
   "oxfmt": {
-    "deferredLatest": "0.79.0",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 0.72.0）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "0.80.0",
+    "reason": "2026-11-24 重新延後（registry 在 2026-11-22 評估後又發佈 0.80.0；reviewed 2026-11-24，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 0.72.0；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "oxlint": {
-    "deferredLatest": "1.94.0",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 1.87.0）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "1.95.0",
+    "reason": "2026-11-23 重新延後（registry 在 2026-11-22 評估後又發佈 1.95.0；reviewed 2026-11-23，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 1.87.0；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "oxlint-tsgolint": {
     "deferredLatest": "7.0.2008",
@@ -125,7 +125,7 @@
   },
   "playwright-core": {
     "deferredLatest": "1.65.1",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：moved upstream in 6.10.1 → taken with the upstream sync：上游 rea-agents-6.10.1 已升到 1.64.1（仍低於 registry 最新），隨上游同步（ROADMAP「同步上游 6.9.0–6.10.1」）一併帶入；npm audit 為 0。"
+    "reason": "2026-11-23 已隨同步帶入上游 rea-agents-6.10.1 的釘版 1.64.1（reviewed 2026-11-23，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：registry 最新 1.65.1 尚未驗證相容性；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "plist": {
     "deferredLatest": "5.1.2",

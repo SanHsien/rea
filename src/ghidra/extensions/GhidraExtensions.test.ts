@@ -1,12 +1,12 @@
-import { ArtifactResourceScope } from "../../artifacts/ArtifactResourceScope.js";
+import { ArtifactResourceScope } from "../../resources/ArtifactResourceScope.js";
 import { execFile } from "node:child_process";
 import { constants } from "node:fs";
 import { promisify } from "node:util";
 import { createHash } from "node:crypto";
-import { mkdtemp, open, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { open, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { createTestTempDirectory } from "../../../tests/fixtures/temporaryDirectory.js";
 import { parseConfig } from "../../config/parseConfig.js";
 import { projectAnalysisError } from "../../domain/analysisErrorProjection.js";
 import type { BinaryTarget } from "../../domain/binaryTargetTypes.js";
@@ -19,18 +19,13 @@ import {
   type GhidraExtensionResult,
 } from "./GhidraExtensions.js";
 
-const roots: string[] = [];
 let resources = new ArtifactResourceScope();
 afterEach(async () => {
   await resources.close();
   resources = new ArtifactResourceScope();
-  await Promise.all(
-    roots.splice(0).map((path) => rm(path, { recursive: true, force: true })),
-  );
 });
 const root = async () => {
-  const path = await mkdtemp(join(tmpdir(), "rea-extension-test-"));
-  roots.push(path);
+  const path = await createTestTempDirectory("rea-extension-test-");
   return path;
 };
 const target: BinaryTarget = {
@@ -181,7 +176,12 @@ describe("optional Ghidra extension boundary", () => {
       snapshotGhidraExtensions([extension], await root(), resources),
     ).rejects.toMatchObject({
       _tag: "ProviderAdapterError",
-      diagnostics: { reason: expect.stringContaining("digest differs") },
+      diagnostics: {
+        code: "digest_differs",
+        id: extension.id,
+        reason: "digest_differs",
+        path: extension.path,
+      },
     });
   });
   it("rejects nonexistent, empty and non-JAR artifacts with useful reasons", async () => {
@@ -268,48 +268,45 @@ describe("optional Ghidra extension boundary", () => {
     if (!resolved.ok)
       expect(resolved.error._tag).toBe("AnalysisCancelledError");
   });
-  it("refuses traversal identities in an imported extension profile", () => {
-    expect(
-      ghidraExtensionSchema.safeParse({
-        id: "../escape",
-        path: "/fixture.jar",
-        configured_path: "/fixture.jar",
-        sha256: "a".repeat(64),
-        integration_api: 1,
-        entry_class: "ignored",
-      }).success,
-    ).toBe(false);
-  });
+});
+
+it("refuses traversal identities in an imported extension profile", () => {
+  expect(
+    ghidraExtensionSchema.safeParse({
+      id: "../escape",
+      path: "/fixture.jar",
+      configured_path: "/fixture.jar",
+      sha256: "a".repeat(64),
+      integration_api: 1,
+      entry_class: "ignored",
+    }).success,
+  ).toBe(false);
 });
 
 describe("Ghidra extension profile and producer validation", () => {
   it("requires exact inventory, artifact digest and consistent producer status", async () => {
     const { extension } = await artifact();
     const valid = result(extension.sha256);
-    const inventoryMismatch =
-      "Ghidra extension result inventory differs from its committed profile.";
     expect(validateGhidraExtensionResults([extension], [valid])).toBeNull();
-    expect(validateGhidraExtensionResults([extension], [])).toBe(
-      inventoryMismatch,
+    expect(validateGhidraExtensionResults([extension], [])).toContain(
+      "inventory",
     );
-    expect(validateGhidraExtensionResults([], [valid])).toBe(inventoryMismatch);
-    expect(validateGhidraExtensionResults([extension], [valid, valid])).toBe(
-      inventoryMismatch,
-    );
+    expect(validateGhidraExtensionResults([], [valid])).toContain("inventory");
     expect(
-      validateGhidraExtensionResults(
-        [extension],
-        [{ ...valid, sha256: "b".repeat(64) }],
-      ),
-    ).toBe("Ghidra extension identity mismatch: nativeaot");
+      validateGhidraExtensionResults([extension], [valid, valid]),
+    ).toContain("inventory");
+    const identityMismatch = validateGhidraExtensionResults(
+      [extension],
+      [{ ...valid, sha256: "b".repeat(64) }],
+    );
+    expect(identityMismatch).toContain("identity");
+    expect(identityMismatch).toContain(extension.id);
     expect(
       validateGhidraExtensionResults(
         [extension],
         [{ ...valid, status: "complete" }],
       ),
-    ).toBe(
-      "NativeAOT extension returned a malformed or inconsistent producer report.",
-    );
+    ).toContain("producer report");
   });
   it("requires matching explicit configuration for imported executable profiles", async () => {
     const { extension, path } = await artifact();
@@ -323,39 +320,28 @@ describe("Ghidra extension profile and producer validation", () => {
     ).toBeNull();
     expect(
       validateGhidraExtensionProfile([extension], config(), target, "linux"),
-    ).toBe(
-      "Configured Ghidra extension inventory differs from the resolved analysis profile.",
+    ).toContain("inventory");
+    const unsupportedHost = validateGhidraExtensionProfile(
+      [extension],
+      config(path),
+      target,
+      "darwin",
     );
-    expect(
-      validateGhidraExtensionProfile(
-        [extension],
-        config(path),
-        target,
-        "darwin",
-      ),
-    ).toBe(
-      "NativeAOT recovery is verified on Linux only; omit REA_GHIDRA_NATIVEAOT_JAR for ordinary native analysis.",
-    );
-    expect(
-      validateGhidraExtensionProfile(
-        [{ ...extension, entry_class: "arbitrary.Code" }],
-        config(path),
-        target,
-        "linux",
-      ),
-    ).toBe(
-      "Ghidra extension profile lacks matching explicit local configuration: nativeaot",
-    );
-    expect(
-      validateGhidraExtensionProfile(
-        [{ ...extension, configured_path: "/another.jar" }],
+    expect(unsupportedHost).toContain("Linux");
+    expect(unsupportedHost).toContain("REA_GHIDRA_NATIVEAOT_JAR");
+    for (const changed of [
+      { ...extension, entry_class: "arbitrary.Code" },
+      { ...extension, configured_path: "/another.jar" },
+    ]) {
+      const invalid = validateGhidraExtensionProfile(
+        [changed],
         config(path),
         target,
         "linux",
-      ),
-    ).toBe(
-      "Ghidra extension profile lacks matching explicit local configuration: nativeaot",
-    );
+      );
+      expect(invalid).toContain("configuration");
+      expect(invalid).toContain(extension.id);
+    }
   });
   it("does not classify PE/CLI or ReadyToRun as NativeAOT", async () => {
     const resolved = await resolveGhidraExtensions(
@@ -384,7 +370,11 @@ describe("Ghidra extension profile and producer validation", () => {
       ),
     ).rejects.toMatchObject({
       _tag: "ProviderAdapterError",
-      diagnostics: { reason: expect.stringContaining("resolved path differs") },
+      diagnostics: {
+        code: "path_differs",
+        id: second.extension.id,
+        reason: "path_differs",
+      },
     });
   });
   it("rejects unregistered descriptors before snapshot filesystem writes", async () => {
@@ -398,7 +388,11 @@ describe("Ghidra extension profile and producer validation", () => {
       ),
     ).rejects.toMatchObject({
       _tag: "ProviderAdapterError",
-      diagnostics: { reason: expect.stringContaining("Unregistered") },
+      diagnostics: {
+        code: "unregistered",
+        id: "unknown",
+        reason: "unregistered",
+      },
     });
   });
 });
@@ -451,8 +445,8 @@ describe("Ghidra extension recovery coverage", () => {
         },
       },
     };
-    expect(validateGhidraExtensionResults([extension], [incomplete])).toBe(
-      "NativeAOT recovery coverage contradicts its reported completion status.",
+    expect(validateGhidraExtensionResults([extension], [incomplete])).toContain(
+      "coverage",
     );
     expect(
       validateGhidraExtensionResults(
@@ -471,9 +465,7 @@ describe("Ghidra extension recovery coverage", () => {
         [extension],
         [{ ...positive, result: { ...positive.result, discovery: null } }],
       ),
-    ).toBe(
-      "NativeAOT extension returned a malformed or inconsistent producer report.",
-    );
+    ).toContain("producer report");
   });
   it("preserves real loader failures without requiring a successful analyzer report", async () => {
     const { extension } = await artifact();
@@ -498,14 +490,13 @@ describe("Ghidra extension recovery coverage", () => {
     const incomplete = result(extension.sha256);
     incomplete.result.status = "complete";
     incomplete.result.reason = null;
-    expect(
-      validateGhidraExtensionResults(
-        [extension],
-        [{ ...incomplete, status: "complete", reason: null }],
-      ),
-    ).toBe(
-      "NativeAOT recovery omitted its supported format, method-table inventory or derived-memory identity.",
+    const rejection = validateGhidraExtensionResults(
+      [extension],
+      [{ ...incomplete, status: "complete", reason: null }],
     );
+    expect(rejection).toContain("format");
+    expect(rejection).toContain("method-table");
+    expect(rejection).toContain("derived-memory");
   });
   it.each(["not_applicable", "unsupported", "failed"] as const)(
     "rejects contradictory %s reports without discarding discovery context",
@@ -530,7 +521,7 @@ describe("Ghidra extension recovery coverage", () => {
           [extension],
           [{ ...report, result: { ...report.result, method_tables: 1 } }],
         ),
-      ).toBe("NativeAOT non-recovery status carries recovered metadata.");
+      ).toContain("metadata");
       for (const reason of [null, "", " "] as const)
         expect(
           validateGhidraExtensionResults(
@@ -543,7 +534,7 @@ describe("Ghidra extension recovery coverage", () => {
               },
             ],
           ),
-        ).toBe("NativeAOT non-recovery status omits its required reason.");
+        ).toContain("reason");
     },
   );
 });

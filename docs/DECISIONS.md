@@ -256,3 +256,19 @@ release-recovery.yml
 - 做法：`.github/dependency-deferrals.json` 把這 30 項的 `deferredLatest` 改成目前 registry 最新版；`reason` 註明「moved upstream in 6.10.1 → taken with the upstream sync」或「upstream unchanged」，並寫 reviewed 2026-11-22、revisit 2026-12-07。檔案結構只有 `deferredLatest` 與 `reason` 兩欄，檢查器不認其他欄位，所以日期寫在 `reason` 內。
 - 安全：`npm audit --json` 為 0 筆（info／low／moderate／high／critical 全 0），這 30 項沒有開啟中的公告。
 - 重新評估條件：2026-12-07 到期，或 registry 又超過各自的 `deferredLatest`。到期時先看上游同步是否已完成；完成就刪掉已同步項目的延後條目。
+
+## 2026-11-23：同步到上游 `rea-agents-6.10.1`（淨樹同步；撤回測試選擇偏離；本機 Windows 原生模組前提）
+
+完整的衝突表、workflow 與供應鏈審查、PR／issue 分流與驗證在 [`docs/records/upstream-sync-evaluation-2026-11-23.md`](records/upstream-sync-evaluation-2026-11-23.md)。這裡只記會影響日後判斷的決定：
+
+- **作法**：合成 commit 的父改為 `rea-agents-6.8.0` tag（樹等於 fork `main`），合併 `rea-agents-6.10.1` 後只把結果的樹以單一 commit 接在 `main` 上。基底是真實的上游點，衝突只出現在 fork 動過的地方；之後的同步照這個作法。上游 3441 個 commit、PR #7098–#12737、issue #7096–#12920 已審查，水位推進到 `rea-agents-6.10.1`、PR #12737、issue #12920。
+- **撤回「測試選擇改以檔案傳遞」（2026-10-28 的偏離）**：上游把選擇上限定為 400 個檔、超過就跑完整套件，選擇 JSON 不會再隨變更路徑數量長大，原本的 `Argument list too long` 失敗模式不存在了。`ci.yml`、`plan.mjs`、`test-report.mjs` 與兩個測試回到上游版本，只保留 fork 的週排程與 `CI_FORCE_FULL` 比對字串。
+- **fork 修正的處置**：上游已用等效作法解決的（zod 4.6 的 `omittableDefaults`／`offsetDateTime`、Windows 絕對路徑 pattern、`MacHopperPaths`、`qs`／`vite` override）採上游；上游沒有的（寫檔 hard link 備援、darwin 的 `settledLivePids`、Ghidra 磁碟機代號 `JAVA_HOME`、Windows 測試略過、`minimatch` 11.0.1 override、`zod` 4.6.7）保留或疊回。保留 fork 的 `codeql.yml` 與 `dependabot.yml`（上游同名新檔不採用）。
+- **本機 Windows 的原生模組前提**：`run-exclusive` 與 verifier fixture 在 Windows 上需要 `native/windows/build/`，沒有它 `npm run build:cached`、`docs:check`、`test:prepare` 都會失敗。這不是 6.10.x 才有：2026-11-24 在同步前的 fork `main`（`f61ce6301`，6.8.0）乾淨檢出上跑 `npm run build:cached`，同樣以「Missing packaged Windows native file native/windows/build/manifest.json」失敗，訊息指示從同版 tarball 復原。這是上游刻意的前提，復原步驟在 `native/windows/README.md`；本機各檢出要放與自己版本相符的檔案（6.10.1 的 `rea-windows-x64.node` SHA-256 `801a9994…`、6.8.0 的 `6a015bfe…`，皆與 tarball 內 manifest 一致）。CI 在 Linux，不受影響。不改上游碼、不另列 ROADMAP。
+- **依賴新鮮度**：同步後重跑 `tools/check_dependency_freshness.py`，上游已移除的 `incur` 從 `.github/dependency-deferrals.json` 刪除，`playwright-core` 改記上游 6.10.1 的釘版；同步後新落後的 `@toon-format/toon`、`knip`、`lint-staged` 與 registry 又出新版的 `oxlint`、`oxfmt` 照「釘版跟隨上游」延後到 2026-12-07。2026-11-24 重跑為 0 筆待評估（見紀錄 §7）。
+- **同步後在 Windows 找到並修掉的 4 個回歸**（合併後失敗、純上游 6.10.1 檢出在同一台機器上通過）：
+  - `src/ghidra/GhidraInstallation.test.ts` 的 fork 測試「磁碟機代號的 `JAVA_HOME` 在任何主機都算絕對路徑」：上游改成沒有 `application.properties` 就不探測 Java，win32 案例的假主機只認 POSIX 的 properties 路徑，探測次數變 0。假主機補上 Windows 的 properties 與 launcher 路徑。
+  - `src/adb/AdbCommand.test.ts`「a signal exit」：上游改用真實子程序自送 SIGTERM。Windows 沒有訊號結束，自送 SIGTERM 等於 `TerminateProcess` 結束碼 1；fork 的 `WindowsOwnedProcess` 補上 `SystemRoot` 後子程序正常執行，結果就和「完成且回 false」無法區分（純上游的子程序缺 `SystemRoot`，結果剛好落在協定錯誤）。這個案例在 win32 略過，Linux／macOS 照跑；產品碼不動。
+  - `tests/boundary/filesystem/ciCodeqlScope.test.ts`：驗的是上游 `CodeQL production` workflow 的形狀，fork 保留自己的 `codeql.yml`，模組載入就失敗。改驗 fork workflow 的觸發與語言矩陣；`scripts/ci/codeql-scope.mjs` 與 `.github/codeql/production.yml` 的上游斷言保留。
+  - `tests/boundary/filesystem/documentationFacts.test.ts`：fork 用來取代 Discord 徽章的連結突變還指向舊路徑 `../installation.md#hopper`，改成上游搬移後的 `../getting-started/installation.md#hopper`。
+- **Node 26 列結案**：6.10.1 的 `scripts/lib/verifier-source-loader.mjs` 先以 transform 模式探測，Node 26 上明確拒絕並提示改用 `.nvmrc` 的版本（2026-11-24 以 Node 26.12.1 實跑 `importVerifierSource` 得到該訊息），符合 ROADMAP 該列「上游明確擋下 Node 26」的觸發條件。`engines` 的 `>=26.12.1` 指已安裝套件的執行環境，source script 一律用 `.nvmrc`；ROADMAP 刪除該列。
