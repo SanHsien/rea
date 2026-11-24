@@ -76,16 +76,16 @@
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 0.9.3）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
   },
   "frida": {
-    "deferredLatest": "17.27.4",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 17.23.2）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "17.27.5",
+    "reason": "2026-11-24 重新延後（registry 在 2026-11-22 評估後又發佈 17.27.5；reviewed 2026-11-24，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 17.23.2；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "ignore": {
     "deferredLatest": "7.0.16",
     "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 7.0.6）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
   },
   "isomorphic-git": {
-    "deferredLatest": "1.44.18",
-    "reason": "2026-11-22 重新延後（reviewed 2026-11-22，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：upstream unchanged（rea-agents-6.10.1 仍釘 1.38.7）：精確釘版跟隨上游，不自行偏離；npm audit 為 0。"
+    "deferredLatest": "1.44.19",
+    "reason": "2026-11-24 重新延後（registry 在 2026-11-22 評估後又發佈 1.44.19；reviewed 2026-11-24，revisit 2026-12-07，CI 觀察期 2026-12-04 結束後）：上游 rea-agents-6.10.1 釘 1.38.7；釘版跟隨上游，不自行升級；npm audit 為 0。"
   },
   "jscpd": {
     "deferredLatest": "5.4.3",
